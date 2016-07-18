@@ -1,0 +1,27 @@
+{
+    "name": "weez/rabbitmq",
+    "description": "Description of project weez-rabbitmq.",
+    "authors": [
+        {
+            "name": "Teddy Dona",
+            "email": "teddy.dona@gmail.com"
+        }
+    ],
+    "require": {
+        "php-amqplib/php-amqplib": "v2.6.2",
+        "php-amqplib/thumper": "v0.4.0"
+    },
+    "require-dev": {
+        "fzaninotto/faker": "* v1.6.0",
+        "mockery/mockery": "^0.9.5",
+        "phpunit/phpunit": "^5.4",
+        "phpspec/phpspec": "^2.5",
+        "friendsofphp/php-cs-fixer": "v1.11.5"
+    },
+    "autoload": {
+        "psr-0": {
+            "tests": "",
+            "Weez": "src/"
+        }
+    }
+}
