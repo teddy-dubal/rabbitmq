@@ -80,14 +80,14 @@ $p        = array(
 //            ),
 ////            'exchange'    => 'default_topic',
 //            'routing_key' => '#',
-//            'callback'    => 'Weez\Rabbitmq\Workers\debugWorker'
+//            'callback'    => 'App\Rabbitmq\Workers\debugWorker'
 //        ),
 //    ),
 );
 $c                  = new Pimple\Container();
 $c['rabbitmq_conf'] = $p;
 $ck       = isset($argv[1]) ? $argv[1] : 'local';
-$producer           = new Weez\Rabbitmq\RabbitMQ($c);
+$producer           = new App\Rabbitmq\RabbitMQ($c);
 for ($i = 0; $i < 10; $i++) {
     $rt_k = $routing_keys[array_rand($routing_keys)];
     var_dump($rt_k);

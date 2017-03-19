@@ -7,7 +7,7 @@ $is_debug = true;
 
 $c = new Pimple\Container();
 try {
-    $av      = new Weez\Rabbitmq\RabbitMQ($c);
+    $av      = new App\Rabbitmq\RabbitMQ($c);
     $ck      = isset($argv[1]) ? $argv[1] : 'local';
     $client  = $av->getRpcClient($ck, $ck);
     $client->addRequest('test1', $ck, $ck); //the third parameter is the request identifie

@@ -4,7 +4,7 @@ $base_config = array(
     'connections' => array(
         'default' => array(
             'lazy'     => true,
-            'host'     => '172.17.0.2',
+            'host' => 'lae_rabbitmq',
             'port'     => 5672,
             'user'     => 'guest',
             'password' => 'guest',
@@ -36,10 +36,10 @@ $base_config = array(
         )
     ),
     'consumers'   => array(
-        'notify'                     => array(
+        'email_send' => array(
             'exchange' => 'default_topic',
             'queues'   => array(
-                'email_send'
+                'email_sendS'
             )
         ),
         'test'                       => array(
@@ -108,21 +108,21 @@ $base_config = array(
                 'name' => 'Weez.Q.Topic.v1.email_send',
             ),
             'routing_key' => 'email.send',
-            'callback'    => 'Weez\Rabbitmq\Workers\emailWorker'
+            'callback'    => 'App\Rabbitmq\Workers\emailWorker'
         ),
         'catch_all'   => array(
             'options'     => array(
                 'name' => 'Weez.Q.Topic.v1.catch_all',
             ),
             'routing_key' => '#',
-            'callback'    => 'Weez\Rabbitmq\Workers\debugWorker'
+            'callback'    => 'App\Rabbitmq\Workers\debugWorker'
         ),
         'dead_letter' => array(
             'options'     => array(
                 'name' => 'Weez.Q.Topic.v1.dead_letter',
             ),
             'routing_key' => '#',
-            'callback'    => 'Weez\Rabbitmq\Workers\deadLetterWorker'
+            'callback'    => 'App\Rabbitmq\Workers\deadLetterWorker'
         ),
         'delayed'     => array(
             'options'     => array(
@@ -135,21 +135,21 @@ $base_config = array(
                 )
             ),
             'routing_key' => 'delayed.#',
-            'callback'    => 'Weez\Rabbitmq\Workers\debugWorker'
+            'callback'    => 'App\Rabbitmq\Workers\debugWorker'
         )
     ),
     'rpc_servers' => array(
         'default' => array(
             'exchange' => 'default_direct',
-            'callback' => 'Weez\Rabbitmq\Workers\rpcCallback'
+            'callback' => 'App\Rabbitmq\Workers\rpcCallback'
         ),
         'test'    => array(
             'exchange' => 'default_direct',
-            'callback' => 'Weez\Rabbitmq\Workers\debugRpcCallback'
+            'callback' => 'App\Rabbitmq\Workers\debugRpcCallback'
         ),
         'local'   => array(
             'exchange' => 'default_direct',
-            'callback' => 'Weez\Rabbitmq\Workers\debugRpcCallback'
+            'callback' => 'App\Rabbitmq\Workers\debugRpcCallback'
         )
     ),
     'rpc_clients' => array(

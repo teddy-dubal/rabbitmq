@@ -28,9 +28,9 @@
  * @package    Thumper
  */
 
-namespace Weez\Rabbitmq\Mod;
+namespace App\Rabbitmq\Mod;
 
-use \Exception;
+use Exception;
 use PhpAmqpLib\Connection\AMQPLazyConnection;
 
 /**
@@ -40,13 +40,13 @@ use PhpAmqpLib\Connection\AMQPLazyConnection;
  * @category   Thumper
  * @package    Thumper
  */
-class Consumer extends \Thumper\Consumer {
+class RpcServer extends \Thumper\RpcServer {
 
     private $_dic;
 
     public function __construct($con_params) {
-        $connection = new AMQPLazyConnection($con_params['host'], $con_params['port'], $con_params['user'], $con_params['password'], $con_params['vhost']);
-        parent::__construct($connection);
+        $conn = new AMQPLazyConnection($con_params['host'], $con_params['port'], $con_params['user'], $con_params['password'], $con_params['vhost']);
+        parent::__construct($conn);
     }
 
     public function setDic($dic) {
@@ -56,12 +56,11 @@ class Consumer extends \Thumper\Consumer {
     public function processMessage($msg) {
         try {
             $body = json_decode($msg->body, true);
-            call_user_func($this->callback, $body, $msg->delivery_info, $this->_dic);
             $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
-            $this->consumed++;
-            $this->maybeStopConsumer($msg);
+            $result = call_user_func($this->callback, $body, $msg->delivery_info, $this->_dic);
+            $this->sendReply($result, $msg->get('reply_to'), $msg->get('correlation_id'));
         } catch (Exception $e) {
-            throw $e;
+            $this->sendReply('error: ' . $e->getMessage(), $msg->get('reply_to'));
         }
     }
 

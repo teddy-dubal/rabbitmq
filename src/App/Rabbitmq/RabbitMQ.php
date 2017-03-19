@@ -1,12 +1,12 @@
 <?php
 
-namespace Weez\Rabbitmq;
+namespace App\Rabbitmq;
 
 use \Exception;
-use \Weez\Rabbitmq\Mod\Consumer;
-use \Weez\Rabbitmq\Mod\Producer;
-use \Weez\Rabbitmq\Mod\RpcClient;
-use \Weez\Rabbitmq\Mod\RpcServer;
+use \App\Rabbitmq\Mod\Consumer;
+use \App\Rabbitmq\Mod\Producer;
+use \App\Rabbitmq\Mod\RpcClient;
+use \App\Rabbitmq\Mod\RpcServer;
 use \Pimple\Container;
 use \Thumper\AnonConsumer;
 
@@ -41,7 +41,7 @@ class RabbitMQ {
     /**
      *
      * @param boolean $debug
-     * @return \Weez\Rabbitmq\RabbitMQ
+     * @return \App\Rabbitmq\RabbitMQ
      */
     public function setDebug($debug)
     {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Weez\Rabbitmq\Workers;
+namespace App\Rabbitmq\Workers;
 
 class debugWorker
 {

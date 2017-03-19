@@ -9,7 +9,7 @@ $options['reconnect_period'] = 3;
 $ck                          = isset($argv[1]) ? $argv[1] : 'local';
 while (true) {
     try {
-        $av = new Weez\Rabbitmq\RabbitMQ($c);
+        $av = new App\Rabbitmq\RabbitMQ($c);
         $av->getRpcServer($ck, $ck);
         break;
     } catch (Exception $e) {

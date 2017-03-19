@@ -1,1 +1,1 @@
-# weez-rabbitmq
+# app-rabbitmq

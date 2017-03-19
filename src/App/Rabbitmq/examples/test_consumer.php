@@ -68,14 +68,14 @@ $p        = array(
                 'name' => 'Weez.Q.Direct.v1',
             ),
             'routing_key' => 'donation.toto',
-            'callback'    => 'Weez\Rabbitmq\Workers\debugWorker'
+            'callback'    => 'App\Rabbitmq\Workers\debugWorker'
         ),
     ),
 );
 $c                  = new Pimple\Container();
 $c['rabbitmq_conf'] = $p;
 $ck       = isset($argv[1]) ? $argv[1] : 'local';
-$av       = new Weez\Rabbitmq\RabbitMQ($c);
+$av       = new App\Rabbitmq\RabbitMQ($c);
 $consumer = $av->getConsumer($ck, $ck);
 $consumer->consume(0);
 

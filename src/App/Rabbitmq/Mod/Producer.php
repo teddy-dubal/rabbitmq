@@ -28,10 +28,10 @@
  * @package    Thumper
  */
 
-namespace Weez\Rabbitmq\Mod;
+namespace App\Rabbitmq\Mod;
 
-use Exception;
 use PhpAmqpLib\Connection\AMQPLazyConnection;
+use PhpAmqpLib\Message\AMQPMessage;
 
 /**
  *
@@ -40,7 +40,7 @@ use PhpAmqpLib\Connection\AMQPLazyConnection;
  * @category   Thumper
  * @package    Thumper
  */
-class RpcServer extends \Thumper\RpcServer {
+class Producer extends \Thumper\Producer {
 
     private $_dic;
 
@@ -53,15 +53,16 @@ class RpcServer extends \Thumper\RpcServer {
         $this->_dic = $dic;
     }
 
-    public function processMessage($msg) {
-        try {
-            $body = json_decode($msg->body, true);
-            $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
-            $result = call_user_func($this->callback, $body, $msg->delivery_info, $this->_dic);
-            $this->sendReply($result, $msg->get('reply_to'), $msg->get('correlation_id'));
-        } catch (Exception $e) {
-            $this->sendReply('error: ' . $e->getMessage(), $msg->get('reply_to'));
+    public function publish($msgBody, $routingKey = '', $msg_arguments = array())
+    {
+        if (!$this->exchangeReady) {
+            //declare a durable non autodelete exchange
+            $this->ch->exchange_declare($this->exchangeOptions['name'], $this->exchangeOptions['type'], $this->exchangeOptions['passive'], $this->exchangeOptions['durable'], $this->exchangeOptions['auto_delete'], $this->exchangeOptions['internal'], $this->exchangeOptions['nowait'], $this->exchangeOptions['arguments'], $this->exchangeOptions['ticket']);
+            $this->exchangeReady = true;
         }
+
+        $msg = new AMQPMessage($msgBody, array_merge(array('content_type' => 'text/plain', 'delivery_mode' => 2), $msg_arguments));
+        $this->ch->basic_publish($msg, $this->exchangeOptions['name'], $routingKey);
     }
 
 }

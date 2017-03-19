@@ -28,8 +28,9 @@
  * @package    Thumper
  */
 
-namespace Weez\Rabbitmq\Mod;
+namespace App\Rabbitmq\Mod;
 
+use \Exception;
 use PhpAmqpLib\Connection\AMQPLazyConnection;
 
 /**
@@ -39,11 +40,29 @@ use PhpAmqpLib\Connection\AMQPLazyConnection;
  * @category   Thumper
  * @package    Thumper
  */
-class RpcClient extends \Thumper\RpcClient {
+class Consumer extends \Thumper\Consumer {
+
+    private $_dic;
 
     public function __construct($con_params) {
-        $conn = new AMQPLazyConnection($con_params['host'], $con_params['port'], $con_params['user'], $con_params['password'], $con_params['vhost']);
-        parent::__construct($conn);
+        $connection = new AMQPLazyConnection($con_params['host'], $con_params['port'], $con_params['user'], $con_params['password'], $con_params['vhost']);
+        parent::__construct($connection);
+    }
+
+    public function setDic($dic) {
+        $this->_dic = $dic;
+    }
+
+    public function processMessage($msg) {
+        try {
+            $body = json_decode($msg->body, true);
+            call_user_func($this->callback, $body, $msg->delivery_info, $this->_dic);
+            $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+            $this->consumed++;
+            $this->maybeStopConsumer($msg);
+        } catch (Exception $e) {
+            throw $e;
+        }
     }
 
 }
