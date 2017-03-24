@@ -1,6 +1,6 @@
 {
-    "name": "weez/rabbitmq",
-    "description": "Description of project weez-rabbitmq.",
+    "name": "app/rabbitmq",
+    "description": "Description of project app-rabbitmq.",
     "authors": [
         {
             "name": "Teddy Dona",
@@ -21,7 +21,7 @@
     "autoload": {
         "psr-0": {
             "tests": "",
-            "Weez": "src/"
+            "App": "src/"
         }
     }
 }
