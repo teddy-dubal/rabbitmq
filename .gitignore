@@ -11,10 +11,11 @@ composer.phar
 
 
 ### NetBeans ###
-nbproject/private/
+nbproject/
 build/
 nbbuild/
 dist/
 nbdist/
 nbactions.xml
 .nb-gradle/
+/composer.lock
