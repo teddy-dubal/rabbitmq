@@ -30,8 +30,9 @@
 
 namespace App\Rabbitmq\Mod;
 
-use \Exception;
+use Exception;
 use PhpAmqpLib\Connection\AMQPLazyConnection;
+use PhpAmqpLib\Message\AMQPMessage;
 
 /**
  *
@@ -53,7 +54,7 @@ class Consumer extends \Thumper\Consumer {
         $this->_dic = $dic;
     }
 
-    public function processMessage($msg) {
+    public function processMessage(AMQPMessage $msg) {
         try {
             $body = json_decode($msg->body, true);
             call_user_func($this->callback, $body, $msg->delivery_info, $this->_dic);

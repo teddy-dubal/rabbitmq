@@ -32,6 +32,7 @@ namespace App\Rabbitmq\Mod;
 
 use Exception;
 use PhpAmqpLib\Connection\AMQPLazyConnection;
+use PhpAmqpLib\Message\AMQPMessage;
 
 /**
  *
@@ -53,7 +54,7 @@ class RpcServer extends \Thumper\RpcServer {
         $this->_dic = $dic;
     }
 
-    public function processMessage($msg) {
+    public function processMessage(AMQPMessage $msg) {
         try {
             $body = json_decode($msg->body, true);
             $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);

@@ -18,3 +18,4 @@ dist/
 nbdist/
 nbactions.xml
 .nb-gradle/
+/composer.lock
