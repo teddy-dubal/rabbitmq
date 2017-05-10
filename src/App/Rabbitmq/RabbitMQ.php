@@ -11,7 +11,7 @@ use \Pimple\Container;
 use \Thumper\AnonConsumer;
 
 /**
- * Weez helper class to use RabbitMQ
+ * App helper class to use RabbitMQ
  */
 class RabbitMQ {
 

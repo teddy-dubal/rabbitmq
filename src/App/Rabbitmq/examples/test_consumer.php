@@ -30,7 +30,7 @@ $p        = array(
     'exchanges'   => array(
         'default_topic'  => array(
             'exchange_options' => array(
-                'name'        => 'Weez.E.Topic.v0.Default',
+                'name' => 'App.E.Topic.v0.Default',
                 'type'        => 'topic',
                 'passive'     => false,
                 'durable'     => true,
@@ -41,7 +41,7 @@ $p        = array(
         ),
         'default_direct' => array(
             'exchange_options' => array(
-                'name'        => 'Weez.E.direct.v0.default',
+                'name' => 'App.E.direct.v0.default',
                 'type'        => 'direct',
                 'passive'     => false,
                 'durable'     => true,
@@ -52,7 +52,7 @@ $p        = array(
         ),
         'dead_topic'     => array(
             'exchange_options' => array(
-                'name'        => 'Weez.E.Topic.v0.Dead',
+                'name' => 'App.E.Topic.v0.Dead',
                 'type'        => 'topic',
                 'passive'     => false,
                 'durable'     => true,
@@ -65,7 +65,7 @@ $p        = array(
     'queues'      => array(
         'direct' => array(
             'options'     => array(
-                'name' => 'Weez.Q.Direct.v1',
+                'name' => 'App.Q.Direct.v1',
             ),
             'routing_key' => 'donation.toto',
             'callback'    => 'App\Rabbitmq\Workers\debugWorker'

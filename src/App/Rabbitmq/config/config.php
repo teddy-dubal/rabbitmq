@@ -70,7 +70,7 @@ $base_config = array(
     'exchanges'   => array(
         'default_topic'  => array(
             'exchange_options' => array(
-                'name'        => 'Weez.E.Topic.v0.Default',
+                'name' => 'App.E.Topic.v0.Default',
                 'type'        => 'topic',
                 'passive'     => false,
                 'durable'     => true,
@@ -81,7 +81,7 @@ $base_config = array(
         ),
         'default_direct' => array(
             'exchange_options' => array(
-                'name'        => 'Weez.E.direct.v0.default',
+                'name' => 'App.E.direct.v0.default',
                 'type'        => 'direct',
                 'passive'     => false,
                 'durable'     => true,
@@ -92,7 +92,7 @@ $base_config = array(
         ),
         'dead_topic'     => array(
             'exchange_options' => array(
-                'name'        => 'Weez.E.Topic.v0.Dead',
+                'name' => 'App.E.Topic.v0.Dead',
                 'type'        => 'topic',
                 'passive'     => false,
                 'durable'     => true,
@@ -105,32 +105,32 @@ $base_config = array(
     'queues'      => array(
         'email_send'  => array(
             'options'     => array(
-                'name' => 'Weez.Q.Topic.v1.email_send',
+                'name' => 'App.Q.Topic.v1.email_send',
             ),
             'routing_key' => 'email.send',
             'callback'    => 'App\Rabbitmq\Workers\emailWorker'
         ),
         'catch_all'   => array(
             'options'     => array(
-                'name' => 'Weez.Q.Topic.v1.catch_all',
+                'name' => 'App.Q.Topic.v1.catch_all',
             ),
             'routing_key' => '#',
             'callback'    => 'App\Rabbitmq\Workers\debugWorker'
         ),
         'dead_letter' => array(
             'options'     => array(
-                'name' => 'Weez.Q.Topic.v1.dead_letter',
+                'name' => 'App.Q.Topic.v1.dead_letter',
             ),
             'routing_key' => '#',
             'callback'    => 'App\Rabbitmq\Workers\deadLetterWorker'
         ),
         'delayed'     => array(
             'options'     => array(
-                'name'      => 'Weez.Q.Topic.v1.delayed',
+                'name' => 'App.Q.Topic.v1.delayed',
                 'arguments' => array(
                     'x-dead-letter-exchange' => array(
                         'S',
-                        'Weez.E.Topic.v0.Dead'
+                        'App.E.Topic.v0.Dead'
                     )
                 )
             ),

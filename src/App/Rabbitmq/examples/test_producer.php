@@ -41,7 +41,7 @@ $p        = array(
     'exchanges'   => array(
         'default_topic'  => array(
             'exchange_options' => array(
-                'name'        => 'Weez.E.Topic.v0.Default',
+                'name' => 'App.E.Topic.v0.Default',
                 'type'        => 'topic',
                 'passive'     => false,
                 'durable'     => true,
@@ -52,7 +52,7 @@ $p        = array(
         ),
         'default_direct' => array(
             'exchange_options' => array(
-                'name'        => 'Weez.E.direct.v0.default',
+                'name' => 'App.E.direct.v0.default',
                 'type'        => 'direct',
                 'passive'     => false,
                 'durable'     => true,
@@ -63,7 +63,7 @@ $p        = array(
         ),
         'dead_topic'     => array(
             'exchange_options' => array(
-                'name'        => 'Weez.E.Topic.v0.Dead',
+                'name' => 'App.E.Topic.v0.Dead',
                 'type'        => 'topic',
                 'passive'     => false,
                 'durable'     => true,
@@ -76,7 +76,7 @@ $p        = array(
 //    'queues'      => array(
 //        'catch_all' => array(
 //            'options'     => array(
-//                'name' => 'Weez.Q.Topic.v1.catch_all',
+//                'name' => 'App.Q.Topic.v1.catch_all',
 //            ),
 ////            'exchange'    => 'default_topic',
 //            'routing_key' => '#',
