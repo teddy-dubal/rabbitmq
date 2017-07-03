@@ -39,7 +39,7 @@ $base_config = array(
         'email_send' => array(
             'exchange' => 'default_topic',
             'queues'   => array(
-                'email_sendS'
+                'email_send'
             )
         ),
         'test'                       => array(

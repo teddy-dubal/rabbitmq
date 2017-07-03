@@ -13,10 +13,9 @@ $p                  = array(
 //    ),
     'consumers'   => array(
         'local' => array(
-            'exchange' => 'dead_topic',
 //            'exchange' => 'default_direct',
             'queues'   => array(
-                'direct'
+                'direct',
             )
         )
     ),
@@ -59,6 +58,13 @@ $p                  = array(
         'direct' => array(
             'options'     => array(
                 'name' => 'App.Q.Direct.v1',
+            ),
+            'routing_key' => 'donation.toto',
+            'callback'    => 'App\Rabbitmq\Workers\debugWorker'
+        ),
+        'noty'   => array(
+            'options'     => array(
+                'name' => 'App.Q.Direct.v2',
             ),
             'routing_key' => 'donation.toto',
             'callback'    => 'App\Rabbitmq\Workers\debugWorker'
