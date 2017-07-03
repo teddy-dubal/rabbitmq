@@ -43,8 +43,7 @@ class RabbitMQ {
      * @param boolean $debug
      * @return \App\Rabbitmq\RabbitMQ
      */
-    public function setDebug($debug)
-    {
+    public function setDebug($debug = true) {
         $this->is_debug = $debug;
         return $this;
     }
@@ -97,9 +96,8 @@ class RabbitMQ {
 
     public function publishDelayed($producer, $msg, $routing_key = '', $ttl = 60, $msg_arguments = array()) {
         static $producers;
-        global $is_debug;
 
-        if (!$is_debug) {
+        if (!$this->is_debug) {
             try {
                 if (!isset($producers[$producer])) {
                     $producers[$producer] = $this->getProducer($producer);

@@ -12,7 +12,7 @@ $base_config = array(
         ),
         'test'    => array(
             'lazy'     => true,
-            'host'     => '172.17.0.2',
+            'host'     => 'rabbitmq',
             'port'     => 5672,
             'user'     => 'guest',
             'password' => 'guest',
@@ -20,11 +20,11 @@ $base_config = array(
         ),
         'local'   => array(
             'lazy'     => true,
-            'host'     => '172.17.0.2',
+            'host'     => 'rabbitmq',
             'port'     => 5672,
             'user'     => 'guest',
             'password' => 'guest',
-            'vhost'    => '/'
+            'vhost'    => '/dev'
         )
     ),
     'producers'   => array(

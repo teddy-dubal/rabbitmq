@@ -1,27 +1,20 @@
 <?php
 
-require __DIR__ . '/../../../vendor/autoload.php';
-
-
-$p        = array(
-    'connections' => array(
-        'local' => array(
-            'lazy'     => true,
-            'host'     => '172.17.0.2',
-            'port'     => 5672,
-            'user'     => 'guest',
-            'password' => 'guest',
-            'vhost'    => '/'
-        )
-    ),
-    'producers'   => array(
-        'local' => array(
-            'exchange' => 'default_direct'
-        )
-    ),
+if (file_exists(__DIR__ . '/../../../../vendor/autoload.php')) {
+    require __DIR__ . '/../../../../vendor/autoload.php';
+} else {
+    require __DIR__ . '/../../../../../../vendor/autoload.php';
+}
+$p                  = array(
+//    'producers'   => array(
+//        'local' => array(
+//            'exchange' => 'default_direct'
+//        )
+//    ),
     'consumers'   => array(
         'local' => array(
-            'exchange' => 'default_direct',
+            'exchange' => 'dead_topic',
+//            'exchange' => 'default_direct',
             'queues'   => array(
                 'direct'
             )
@@ -76,6 +69,6 @@ $c                  = new Pimple\Container();
 $c['rabbitmq_conf'] = $p;
 $ck       = isset($argv[1]) ? $argv[1] : 'local';
 $av       = new App\Rabbitmq\RabbitMQ($c);
-$consumer = $av->getConsumer($ck, $ck);
+$consumer           = $av->setDebug()->getConsumer($ck, $ck);
 $consumer->consume(0);
 

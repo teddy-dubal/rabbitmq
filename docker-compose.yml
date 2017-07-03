@@ -3,5 +3,14 @@ services:
     app:
       image: webdevops/php-dev:alpine-3-php7
       volumes:
-        - "./:/app"
+        - ".:/app"
       working_dir: "/app"
+    rabbitmq:
+      image: rabbitmq:3.6.9-management-alpine
+      ports:
+        - "15673:15672"
+        - "5673:5672"
+      environment:
+        RABBITMQ_DEFAULT_USER: guest
+        RABBITMQ_DEFAULT_PASS: guest
+        RABBITMQ_DEFAULT_VHOST: "/dev"

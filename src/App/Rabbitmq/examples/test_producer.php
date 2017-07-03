@@ -1,7 +1,10 @@
 <?php
 
-require __DIR__ . '/../../../vendor/autoload.php';
-
+if (file_exists(__DIR__ . '/../../../../vendor/autoload.php')) {
+    require __DIR__ . '/../../../../vendor/autoload.php';
+} else {
+    require __DIR__ . '/../../../../../../vendor/autoload.php';
+}
 # exemple 1 : topic de base
 
 $routing_keys = array(
@@ -14,20 +17,11 @@ $routing_keys = array(
     'delayed.stream.started'
 );
 
-$p        = array(
-    'connections' => array(
-        'local' => array(
-            'lazy'     => true,
-            'host'     => '172.17.0.2',
-            'port'     => 5672,
-            'user'     => 'guest',
-            'password' => 'guest',
-            'vhost'    => '/'
-        )
-    ),
+$p                  = array(
     'producers'   => array(
         'local' => array(
-            'exchange' => 'default_direct'
+            'exchange' => 'default_direct',
+//            'exchange' => 'dead_topic',
         )
     ),
 //    'consumers'   => array(
@@ -88,9 +82,10 @@ $c                  = new Pimple\Container();
 $c['rabbitmq_conf'] = $p;
 $ck       = isset($argv[1]) ? $argv[1] : 'local';
 $producer           = new App\Rabbitmq\RabbitMQ($c);
-for ($i = 0; $i < 10; $i++) {
+//$rt_k               = $routing_keys[4];
+for ($i = 0; $i < 100; $i++) {
     $rt_k = $routing_keys[array_rand($routing_keys)];
-    var_dump($rt_k);
+//    var_dump($rt_k);
     $msg = json_encode(array('blabl' => 'FTW ' . $i));
     $producer->publish($ck, $msg, $rt_k, array(), $ck);
 }

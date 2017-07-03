@@ -16,7 +16,8 @@
         "mockery/mockery": "^0.9.5",
         "phpunit/phpunit": "^6.1",
         "monolog/monolog": "~1.7",
-        "friendsofphp/php-cs-fixer": "v2.*"
+        "friendsofphp/php-cs-fixer": "v2.*",
+        "pimple/pimple": "^3.0"
     },
     "autoload": {
         "psr-0": {
