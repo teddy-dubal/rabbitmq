@@ -38,13 +38,13 @@ class RabbitMQ {
     protected function getConfig($key, $default = null) {
         return (!empty($this->config[$key])) ? $this->config[$key] : $default;
     }
+
     /**
      *
      * @param boolean $debug
      * @return \App\Rabbitmq\RabbitMQ
      */
-    public function setDebug($debug)
-    {
+    public function setDebug($debug = true) {
         $this->is_debug = $debug;
         return $this;
     }
@@ -53,8 +53,7 @@ class RabbitMQ {
      *
      * @return boolean
      */
-    public function isDebug()
-    {
+    public function isDebug() {
         return (boolean) $this->is_debug;
     }
 
@@ -67,7 +66,7 @@ class RabbitMQ {
      * @param type $msg_arguments
      * @param type $connection
      */
-    public function publish($producer, $msg, $routing_key = '', $msg_arguments = array(), $connection = 'default') {
+    public function publish($producer, $msg, $routing_key = '', $msg_arguments = [], $connection = 'default') {
         if (!$this->is_debug) {
             try {
                 //if (!isset($producers[$producer])) {
@@ -95,11 +94,21 @@ class RabbitMQ {
         }
     }
 
-    public function publishDelayed($producer, $msg, $routing_key = '', $ttl = 60, $msg_arguments = array()) {
-        static $producers;
-        global $is_debug;
+      public function publishWebSocket($producer, $msg, $routing_key = '', $msg_arguments = [], $connection = 'default') {
+        try {
+            $producers[$producer] = $this->getProducer($producer, $connection);
+            $producers[$producer]->setExchangeReady(true);
+            $producers[$producer]->publish(json_encode($msg), $routing_key, $msg_arguments);
+        } catch (Exception $e) {
+            if ($this->c->offsetExists('log'))
+                $this->c['log']->addWarning('Warning error in publish ws: ' . $e->getMessage());
+        }
+    }
 
-        if (!$is_debug) {
+    public function publishDelayed($producer, $msg, $routing_key = '', $ttl = 60, $msg_arguments = []) {
+        static $producers;
+
+        if (!$this->is_debug) {
             try {
                 if (!isset($producers[$producer])) {
                     $producers[$producer] = $this->getProducer($producer);
@@ -137,7 +146,7 @@ class RabbitMQ {
             if (isset($queue['routing_key'])) {
                 if ($queue['routing_key'] === '#' || ($queue['routing_key'] === $routing_key)) {
                     try {
-                        call_user_func(array($queue['callback'], 'execute'), $msg, null);
+                        call_user_func([$queue['callback'], 'execute'], $msg, null);
                     } catch (Exception $e) {
                         if ($this->c->offsetExists('log'))
                             $this->c['log']->addWarning('Warning error in publish: ' . $e->getMessage());
@@ -185,13 +194,13 @@ class RabbitMQ {
             throw new Exception(sprintf('%s rabbitmq connection must have configured vhost', $connection));
         }
 
-        return array(
+        return [
             'host'     => $config['host'],
             'port'     => empty($config['port']) ? 5672 : $config['port'],
             'user'     => $config['user'],
             'password' => $config['password'],
             'vhost'    => $config['vhost']
-        );
+        ];
     }
 
     public function getProducer($name, $connection = 'default') {
@@ -220,7 +229,7 @@ class RabbitMQ {
         $this->setExchange($consumer, $config);
         echo "Connected to " . $con_params['host'] . ":" . $con_params['port'] . " (vhost:" . $con_params['vhost'] . ")\n";
         // get queues
-        $queues = array();
+        $queues   = [];
         if (!empty($config['queues'])) {
             $queue_config = $this->getConfig('queues');
             if (is_array($config['queues'])) {
@@ -241,11 +250,11 @@ class RabbitMQ {
 
     protected static function _processQueues($consumer, $config) {
 
-        $queue_options = empty($config['options']) ? array() : $config['options'];
+        $queue_options = empty($config['options']) ? [] : $config['options'];
         $consumer->setQueueOptions($queue_options);
 
         if (!empty($config['callback'])) {
-            $consumer->setCallback(array($config['callback'], 'execute'));
+            $consumer->setCallback([$config['callback'], 'execute']);
         }
         if (!empty($config['routing_key'])) {
             if (is_array($config['routing_key'])) {
@@ -263,9 +272,9 @@ class RabbitMQ {
     protected function setExchange($amqp_client, $config) {
         $exchange_name   = empty($config['exchange']) ? 'default' : $config['exchange'];
         $exchange_config = $this->getConfig('exchanges');
-        $exchange_config = empty($exchange_config[$exchange_name]) ? array() : $exchange_config[$exchange_name];
+        $exchange_config = empty($exchange_config[$exchange_name]) ? [] : $exchange_config[$exchange_name];
 
-        $exchange_options = empty($exchange_config['exchange_options']) ? array() : $exchange_config['exchange_options'];
+        $exchange_options = empty($exchange_config['exchange_options']) ? [] : $exchange_config['exchange_options'];
         $amqp_client->setExchangeOptions($exchange_options);
     }
 
@@ -282,9 +291,9 @@ class RabbitMQ {
 
         $this->setExchange($consumer, $config);
 
-        $queue_config['options']     = array('name'        => '', 'passive'     => false, 'durable'     => false,
+        $queue_config['options']     = ['name'        => '', 'passive'     => false, 'durable'     => false,
             'exclusive'   => true, 'auto_delete' => true, 'nowait'      => false,
-            'arguments'   => null, 'ticket'      => null);
+            'arguments'   => null, 'ticket'      => null];
         $queue_config['routing_key'] = $config['routing_key'];
         $queue_config['callback']    = $config['callback'];
 
@@ -328,7 +337,7 @@ class RabbitMQ {
         $this->setExchange($server, $config);
         $server->setDic($this->c);
         $server->initServer($name);
-        $server->setCallback(array($config['callback'], 'execute'));
+        $server->setCallback([$config['callback'], 'execute']);
         $server->start();
 
         return $server;

@@ -4,7 +4,7 @@ namespace App\Rabbitmq\Workers;
 
 class deadLetterWorker {
 
-    public static function execute($body, $delivery_info, $headers = array()) {
+    public static function execute($body, $delivery_info, $headers = []) {
         $routing_key = $delivery_info['routing_key'];
 
         if (strpos($routing_key, 'delayed.') === 0) {
