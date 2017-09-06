@@ -53,15 +53,18 @@ class Producer extends \Thumper\Producer {
         $this->_dic = $dic;
     }
 
-    public function publish($msgBody, $routingKey = '', $msg_arguments = array())
-    {
+    public function setExchangeReady($bool = false) {
+        $this->exchangeReady = $bool;
+    }
+
+    public function publish($msgBody, $routingKey = '', $msg_arguments = []) {
         if (!$this->exchangeReady) {
             //declare a durable non autodelete exchange
             $this->channel->exchange_declare($this->exchangeOptions['name'], $this->exchangeOptions['type'], $this->exchangeOptions['passive'], $this->exchangeOptions['durable'], $this->exchangeOptions['auto_delete'], $this->exchangeOptions['internal'], $this->exchangeOptions['nowait'], $this->exchangeOptions['arguments'], $this->exchangeOptions['ticket']);
             $this->exchangeReady = true;
         }
 
-        $msg = new AMQPMessage($msgBody, array_merge(array('content_type' => 'text/plain', 'delivery_mode' => 2), $msg_arguments));
+        $msg = new AMQPMessage($msgBody, array_merge(['content_type' => 'text/plain', 'delivery_mode' => 2], $msg_arguments));
         $this->channel->basic_publish($msg, $this->exchangeOptions['name'], $routingKey);
     }
 

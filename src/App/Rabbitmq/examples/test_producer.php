@@ -7,7 +7,7 @@ if (file_exists(__DIR__ . '/../../../../vendor/autoload.php')) {
 }
 # exemple 1 : topic de base
 
-$routing_keys = array(
+$routing_keys = [
     'user.logged',
     'user.loggedout',
     'user.registered',
@@ -15,15 +15,15 @@ $routing_keys = array(
     'donation.toto',
     'donation.success',
     'delayed.stream.started'
-);
+];
 
-$p                  = array(
-    'producers'   => array(
-        'local' => array(
+$p                  = [
+    'producers' => [
+        'local' => [
             'exchange' => 'default_direct',
 //            'exchange' => 'dead_topic',
-        )
-    ),
+        ]
+    ],
 //    'consumers'   => array(
 //        'local' => array(
 //            'exchange' => 'default_direct',
@@ -32,41 +32,41 @@ $p                  = array(
 //            )
 //        )
 //    ),
-    'exchanges'   => array(
-        'default_topic'  => array(
-            'exchange_options' => array(
-                'name' => 'App.E.Topic.v0.Default',
+    'exchanges' => [
+        'default_topic'  => [
+            'exchange_options' => [
+                'name'        => 'App.E.Topic.v0.Default',
                 'type'        => 'topic',
                 'passive'     => false,
                 'durable'     => true,
                 'auto_delete' => false,
                 'internal'    => false,
                 'nowait'      => false,
-            )
-        ),
-        'default_direct' => array(
-            'exchange_options' => array(
-                'name' => 'App.E.direct.v0.default',
+            ]
+        ],
+        'default_direct' => [
+            'exchange_options' => [
+                'name'        => 'App.E.direct.v0.default',
                 'type'        => 'direct',
                 'passive'     => false,
                 'durable'     => true,
                 'auto_delete' => false,
                 'internal'    => false,
                 'nowait'      => false,
-            )
-        ),
-        'dead_topic'     => array(
-            'exchange_options' => array(
-                'name' => 'App.E.Topic.v0.Dead',
+            ]
+        ],
+        'dead_topic'     => [
+            'exchange_options' => [
+                'name'        => 'App.E.Topic.v0.Dead',
                 'type'        => 'topic',
                 'passive'     => false,
                 'durable'     => true,
                 'auto_delete' => false,
                 'internal'    => false,
                 'nowait'      => false,
-            )
-        ),
-    ),
+            ]
+        ],
+    ],
 //    'queues'      => array(
 //        'catch_all' => array(
 //            'options'     => array(
@@ -77,17 +77,17 @@ $p                  = array(
 //            'callback'    => 'App\Rabbitmq\Workers\debugWorker'
 //        ),
 //    ),
-);
+];
 $c                  = new Pimple\Container();
 $c['rabbitmq_conf'] = $p;
-$ck       = isset($argv[1]) ? $argv[1] : 'local';
+$ck                 = isset($argv[1]) ? $argv[1] : 'local';
 $producer           = new App\Rabbitmq\RabbitMQ($c);
 //$rt_k               = $routing_keys[4];
 for ($i = 0; $i < 10; $i++) {
     $rt_k = $routing_keys[array_rand($routing_keys)];
     $rt_k = '';
 //    var_dump($rt_k);
-    $msg = json_encode(array('blabl' => 'FTW ' . $i));
-    $producer->publish($ck, $msg, $rt_k, array(), $ck);
+    $msg  = json_encode(['blabl' => 'FTW ' . $i]);
+    $producer->publish($ck, $msg, $rt_k, [], $ck);
     echo " [x] Sent ", $msg, "\n";
 }

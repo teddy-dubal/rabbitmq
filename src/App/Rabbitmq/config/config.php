@@ -1,166 +1,187 @@
 <?php
 
-$base_config = array(
-    'connections' => array(
-        'default' => array(
+$base_config = [
+    'connections' => [
+        'default'   => [
             'lazy'     => true,
-            'host' => 'lae_rabbitmq',
+            'host'     => 'lae_rabbitmq',
             'port'     => 5672,
             'user'     => 'guest',
             'password' => 'guest',
             'vhost'    => '/prod'
-        ),
-        'test'    => array(
+        ],
+        'test'      => [
             'lazy'     => true,
             'host'     => 'rabbitmq',
             'port'     => 5672,
             'user'     => 'guest',
             'password' => 'guest',
             'vhost'    => '/dev'
-        ),
-        'local'   => array(
+        ],
+        'local'     => [
             'lazy'     => true,
             'host'     => 'rabbitmq',
             'port'     => 5672,
             'user'     => 'guest',
             'password' => 'guest',
             'vhost'    => '/dev'
-        )
-    ),
-    'producers'   => array(
-        'default' => array(
+        ],
+        'notify_ws' => [
+            'host'     => 'lae_rabbitmq',
+            'port'     => 5672,
+            'user'     => 'guest',
+            'password' => 'guest',
+            'vhost'    => '/notify_ws'
+        ]
+    ],
+    'producers'   => [
+        'default'   => [
             'exchange' => 'default_topic'
-        ),
-        'local'   => array(
+        ],
+        'local'     => [
             'exchange' => 'default_topic'
-        )
-    ),
-    'consumers'   => array(
-        'email_send' => array(
+        ],
+        'notify_ws' => [
+            'exchange' => 'notify_ws'
+        ]
+    ],
+    'consumers'   => [
+        'email_send'                 => [
             'exchange' => 'default_topic',
-            'queues'   => array(
+            'queues'   => [
                 'email_send'
-            )
-        ),
-        'test'                       => array(
+            ]
+        ],
+        'test'                       => [
             'exchange' => 'default_topic',
-            'queues'   => array(
+            'queues'   => [
                 'catch_all'
-            )
-        ),
-        'local'                      => array(
+            ]
+        ],
+        'local'                      => [
             'exchange' => 'default_topic',
-            'queues'   => array(
+            'queues'   => [
                 'catch_all'
-            )
-        ),
-        'base_delayed_do_not_launch' => array(
+            ]
+        ],
+        'base_delayed_do_not_launch' => [
             'exchange' => 'default_topic',
-            'queues'   => array(
+            'queues'   => [
                 'delayed'
-            )
-        ),
-        'dead_letter'                => array(
+            ]
+        ],
+        'dead_letter'                => [
             'exchange' => 'dead_topic',
-            'queues'   => array(
+            'queues'   => [
                 'dead_letter'
-            )
-        )
-    ),
-    'exchanges'   => array(
-        'default_topic'  => array(
-            'exchange_options' => array(
-                'name' => 'App.E.Topic.v0.Default',
+            ]
+        ]
+    ],
+    'exchanges'   => [
+        'default_topic'  => [
+            'exchange_options' => [
+                'name'        => 'App.E.Topic.v0.Default',
                 'type'        => 'topic',
                 'passive'     => false,
                 'durable'     => true,
                 'auto_delete' => false,
                 'internal'    => false,
                 'nowait'      => false,
-            )
-        ),
-        'default_direct' => array(
-            'exchange_options' => array(
-                'name' => 'App.E.direct.v0.default',
+            ]
+        ],
+        'default_direct' => [
+            'exchange_options' => [
+                'name'        => 'App.E.direct.v0.default',
                 'type'        => 'direct',
                 'passive'     => false,
                 'durable'     => true,
                 'auto_delete' => false,
                 'internal'    => false,
                 'nowait'      => false,
-            )
-        ),
-        'dead_topic'     => array(
-            'exchange_options' => array(
-                'name' => 'App.E.Topic.v0.Dead',
+            ]
+        ],
+        'dead_topic'     => [
+            'exchange_options' => [
+                'name'        => 'App.E.Topic.v0.Dead',
                 'type'        => 'topic',
                 'passive'     => false,
                 'durable'     => true,
                 'auto_delete' => false,
                 'internal'    => false,
                 'nowait'      => false,
-            )
-        ),
-    ),
-    'queues'      => array(
-        'email_send'  => array(
-            'options'     => array(
+            ]
+        ],
+        'notify_ws'      => [
+            'exchange_options' => [
+                'name'        => '',
+                'type'        => 'direct',
+                'passive'     => false,
+                'durable'     => true,
+                'auto_delete' => false,
+                'internal'    => false,
+                'nowait'      => false,
+            ]
+        ],
+    ],
+    'queues'      => [
+        'email_send'  => [
+            'options'     => [
                 'name' => 'App.Q.Topic.v1.email_send',
-            ),
+            ],
             'routing_key' => 'email.send',
             'callback'    => 'App\Rabbitmq\Workers\emailWorker'
-        ),
-        'catch_all'   => array(
-            'options'     => array(
+        ],
+        'catch_all'   => [
+            'options'     => [
                 'name' => 'App.Q.Topic.v1.catch_all',
-            ),
+            ],
             'routing_key' => '#',
             'callback'    => 'App\Rabbitmq\Workers\debugWorker'
-        ),
-        'dead_letter' => array(
-            'options'     => array(
+        ],
+        'dead_letter' => [
+            'options'     => [
                 'name' => 'App.Q.Topic.v1.dead_letter',
-            ),
+            ],
             'routing_key' => '#',
             'callback'    => 'App\Rabbitmq\Workers\deadLetterWorker'
-        ),
-        'delayed'     => array(
-            'options'     => array(
-                'name' => 'App.Q.Topic.v1.delayed',
-                'arguments' => array(
-                    'x-dead-letter-exchange' => array(
+        ],
+        'delayed'     => [
+            'options'     => [
+                'name'      => 'App.Q.Topic.v1.delayed',
+                'arguments' => [
+                    'x-dead-letter-exchange' => [
                         'S',
                         'App.E.Topic.v0.Dead'
-                    )
-                )
-            ),
+                    ]
+                ]
+            ],
             'routing_key' => 'delayed.#',
             'callback'    => 'App\Rabbitmq\Workers\debugWorker'
-        )
-    ),
-    'rpc_servers' => array(
-        'default' => array(
+        ]
+    ],
+    'rpc_servers' => [
+        'default' => [
             'exchange' => 'default_direct',
             'callback' => 'App\Rabbitmq\Workers\rpcCallback'
-        ),
-        'test'    => array(
+        ],
+        'test'    => [
             'exchange' => 'default_direct',
             'callback' => 'App\Rabbitmq\Workers\debugRpcCallback'
-        ),
-        'local'   => array(
+        ],
+        'local'   => [
             'exchange' => 'default_direct',
             'callback' => 'App\Rabbitmq\Workers\debugRpcCallback'
-        )
-    ),
-    'rpc_clients' => array(
-        'default' => array(
+        ]
+    ],
+    'rpc_clients' => [
+        'default' => [
             'exchange' => 'default_direct',
-        ),
-        'test'    => array(
+        ],
+        'test'    => [
             'exchange' => 'default_direct',
-        ),
-        'local'   => array(
+        ],
+        'local'   => [
             'exchange' => 'default_direct',
-        )
-    ),
-);
+        ]
+    ],
+];
