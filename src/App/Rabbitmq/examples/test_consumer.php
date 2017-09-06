@@ -16,6 +16,7 @@ $p                  = array(
 //            'exchange' => 'default_direct',
             'queues'   => array(
                 'direct',
+                'noty',
             )
         )
     ),
@@ -59,14 +60,16 @@ $p                  = array(
             'options'     => array(
                 'name' => 'App.Q.Direct.v1',
             ),
-            'routing_key' => 'donation.toto',
+//            'routing_key' => 'donation.toto',
+            'routing_key' => '',
             'callback'    => 'App\Rabbitmq\Workers\debugWorker'
         ),
         'noty'   => array(
             'options'     => array(
                 'name' => 'App.Q.Direct.v2',
             ),
-            'routing_key' => 'donation.toto',
+//            'routing_key' => 'donation.toto',
+            'routing_key' => '',
             'callback'    => 'App\Rabbitmq\Workers\debugWorker'
         ),
     ),
