@@ -113,8 +113,8 @@ $base_config = [
         ],
         'notify_ws'      => [
             'exchange_options' => [
-                'name'        => '',
-                'type'        => 'direct',
+                'name'        => 'amq.topic',
+                'type'        => 'topic',
                 'passive'     => false,
                 'durable'     => true,
                 'auto_delete' => false,
