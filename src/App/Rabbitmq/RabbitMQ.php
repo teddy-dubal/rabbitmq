@@ -157,7 +157,8 @@ class RabbitMQ {
     }
 
     protected function getConnectionParams($connection = 'default') {
-        static $config;
+        static $conf;
+        $config = $conf[$connection] ?? false;
 
         if (!$config) {
             $config = $this->getConfig('connections');
@@ -172,15 +173,14 @@ class RabbitMQ {
             }
             // a string has been passed in parameter
             else {
-                $connection = (isset($connection)) ? $connection : 'default';
-                $config     = $config[$connection];
+                $connection        = (isset($connection)) ? $connection : 'default';
+                $config            = $conf[$connection] = $config[$connection];
             }
 
             if (!$config) {
                 throw new Exception(sprintf('There is no rabbitmq connection with "%s" name in config', $connection));
             }
         }
-
         if (empty($config['host'])) {
             throw new Exception(sprintf('%s rabbitmq connection must have configured host', $connection));
         }
