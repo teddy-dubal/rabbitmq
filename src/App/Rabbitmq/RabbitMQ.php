@@ -27,7 +27,7 @@ class RabbitMQ {
 
     protected function initConfig() {
         if (file_exists(dirname(__FILE__) . '/config/config.inc.php')) {
-            $this->config = include_once(dirname(__FILE__) . '/config/config.inc.php');
+            $this->config = include(dirname(__FILE__) . '/config/config.inc.php');
             if (isset($this->c['rabbitmq_conf'])) {
                 $this->config = array_replace_recursive($this->config, $this->c['rabbitmq_conf']);
             }
