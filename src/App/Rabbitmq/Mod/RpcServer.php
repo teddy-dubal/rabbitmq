@@ -41,27 +41,31 @@ use PhpAmqpLib\Message\AMQPMessage;
  * @category   Thumper
  * @package    Thumper
  */
-class RpcServer extends \Thumper\RpcServer {
+class RpcServer extends \Thumper\RpcServer
+{
 
     private $_dic;
 
-    public function __construct($con_params) {
+    public function __construct($con_params)
+    {
         $conn = new AMQPLazyConnection($con_params['host'], $con_params['port'], $con_params['user'], $con_params['password'], $con_params['vhost']);
         parent::__construct($conn);
     }
 
-    public function setDic($dic) {
+    public function setDic($dic)
+    {
         $this->_dic = $dic;
     }
 
-    public function processMessage(AMQPMessage $msg) {
+    public function processMessage(AMQPMessage $msg)
+    {
         try {
             $body = json_decode($msg->body, true);
             $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
             $result = call_user_func($this->callback, $body, $msg->delivery_info, $this->_dic);
             $this->sendReply($result, $msg->get('reply_to'), $msg->get('correlation_id'));
         } catch (Exception $e) {
-            $this->sendReply('error: ' . $e->getMessage(), $msg->get('reply_to'));
+            $this->sendReply('error: ' . $e->getMessage(), $msg->get('reply_to'), null);
         }
     }
 
