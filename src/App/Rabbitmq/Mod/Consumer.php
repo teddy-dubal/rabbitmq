@@ -31,30 +31,60 @@
 namespace App\Rabbitmq\Mod;
 
 use Exception;
-use PhpAmqpLib\Connection\AMQPLazyConnection;
-use PhpAmqpLib\Message\AMQPMessage;
+use Swarrot\Broker\Message;
+use Swarrot\Consumer as SConsumer;
+use Swarrot\Processor\ProcessorInterface;
+use Swarrot\Broker\MessageProvider\PeclPackageMessageProvider;
 
-/**
- *
- *
- *
- * @category   Thumper
- * @package    Thumper
- */
-class Consumer extends \Thumper\Consumer {
+class Consumer
+{
 
-    private $_dic;
+    private $_dic, $connection, $channel, $queue;
 
-    public function __construct($con_params) {
-        $connection = new AMQPLazyConnection($con_params['host'], $con_params['port'], $con_params['user'], $con_params['password'], $con_params['vhost']);
-        parent::__construct($connection);
+    public function __construct($con_params)
+    {
+        $con_params['login'] = $con_params['user'];
+        $this->connection    = new \AMQPConnection($con_params);
+        $this->connection->connect();
+        $this->channel = new \AMQPChannel($this->connection);
     }
 
-    public function setDic($dic) {
+    public function setExchangeOptions($config)
+    {
+        $exchange = new \AMQPExchange($this->channel);
+        $exchange->setArguments($config);
+        return $this;
+    }
+    public function setQueueOptions($config)
+    {
+        $this->queue = new \AMQPQueue($this->channel);
+        $this->queue->setArguments($config);
+        return $this;
+    }
+    public function setCallback($call = [])
+    {
+
+    }
+    public function setRoutingKey($key)
+    {
+
+    }
+
+    public function consume()
+    {
+        $messageProvider = new PeclPackageMessageProvider($this->queue);
+        $consumer        = new SConsumer($messageProvider, new Processor());
+        $consumer->consume();
+
+    }
+
+    public function setDic($dic)
+    {
         $this->_dic = $dic;
     }
 
-    public function processMessage(AMQPMessage $msg) {
+    public function processMessage(AMQPMessage $msg)
+    {
         try {
             $body = json_decode($msg->body, true);
             call_user_func($this->callback, $body, $msg->delivery_info, $this->_dic);
@@ -66,4 +96,11 @@ class Consumer extends \Thumper\Consumer {
         }
     }
 
+}
+class Processor implements ProcessorInterface
+{
+    public function process(Message $message, array $options)
+    {
+        printf("Consume message #%d\n", $message->getId());
+    }
 }

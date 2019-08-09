@@ -3,12 +3,12 @@
 namespace App\Rabbitmq;
 
 use \Exception;
+use \Pimple\Container;
+use \Thumper\AnonConsumer;
 use \App\Rabbitmq\Mod\Consumer;
 use \App\Rabbitmq\Mod\Producer;
 use \App\Rabbitmq\Mod\RpcClient;
 use \App\Rabbitmq\Mod\RpcServer;
-use \Pimple\Container;
-use \Thumper\AnonConsumer;
 
 /**
  * App helper class to use RabbitMQ

@@ -5,20 +5,20 @@ if (file_exists(__DIR__ . '/../../../../vendor/autoload.php')) {
 } else {
     require __DIR__ . '/../../../../../../vendor/autoload.php';
 }
-$p                  = [
+$p = [
 //    'producers'   => array(
-//        'local' => array(
-//            'exchange' => 'default_direct'
-//        )
-//    ),
+    //        'local' => array(
+    //            'exchange' => 'default_direct'
+    //        )
+    //    ),
     'consumers' => [
         'local' => [
 //            'exchange' => 'default_direct',
             'queues' => [
                 'direct',
                 'noty',
-            ]
-        ]
+            ],
+        ],
     ],
     'exchanges' => [
         'default_topic'  => [
@@ -30,7 +30,7 @@ $p                  = [
                 'auto_delete' => false,
                 'internal'    => false,
                 'nowait'      => false,
-            ]
+            ],
         ],
         'default_direct' => [
             'exchange_options' => [
@@ -41,7 +41,7 @@ $p                  = [
                 'auto_delete' => false,
                 'internal'    => false,
                 'nowait'      => false,
-            ]
+            ],
         ],
         'dead_topic'     => [
             'exchange_options' => [
@@ -52,7 +52,7 @@ $p                  = [
                 'auto_delete' => false,
                 'internal'    => false,
                 'nowait'      => false,
-            ]
+            ],
         ],
     ],
     'queues'    => [
@@ -62,7 +62,7 @@ $p                  = [
             ],
 //            'routing_key' => 'donation.toto',
             'routing_key' => '',
-            'callback'    => 'App\Rabbitmq\Workers\debugWorker'
+            'callback'    => 'App\Rabbitmq\Workers\debugWorker',
         ],
         'noty'   => [
             'options'     => [
@@ -70,7 +70,7 @@ $p                  = [
             ],
 //            'routing_key' => 'donation.toto',
             'routing_key' => '',
-            'callback'    => 'App\Rabbitmq\Workers\debugWorker'
+            'callback'    => 'App\Rabbitmq\Workers\debugWorker',
         ],
     ],
 ];
@@ -79,5 +79,4 @@ $c['rabbitmq_conf'] = $p;
 $ck                 = isset($argv[1]) ? $argv[1] : 'local';
 $av                 = new App\Rabbitmq\RabbitMQ($c);
 $consumer           = $av->setDebug()->getConsumer($ck, $ck);
-$consumer->consume(0);
-
+$consumer->consume();
