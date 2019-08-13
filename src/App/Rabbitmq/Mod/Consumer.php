@@ -40,7 +40,7 @@ class Consumer
 {
 #https://github.com/symfony/messenger/blob/master/Transport/AmqpExt/Connection.php
 
-    private $_dic, $connection, $channel, $queue;
+    private $_dic, $connection, $channel, $queue,$exchange,$callback;
 
     public function __construct($con_params)
     {
@@ -52,12 +52,12 @@ class Consumer
 
     public function setExchangeOptions($config)
     {
-        $exchange = new \AMQPExchange($this->channel);
-        $exchange->setName($config['name']);
-        $exchange->setType($config['type'] ?? AMQP_EX_TYPE_TOPIC);
-        $exchange->setFlags($config['flags'] ?? AMQP_DURABLE);
-        $exchange->setArguments($config);
-        $exchange->declare();
+        $this->exchange = new \AMQPExchange($this->channel);
+        $this->exchange->setName($config['name']);
+        $this->exchange->setType($config['type'] ?? AMQP_EX_TYPE_TOPIC);
+        $this->exchange->setFlags($config['flags'] ?? AMQP_DURABLE);
+        $this->exchange->setArguments($config);
+        $this->exchange->declare();
         return $this;
     }
     public function setQueueOptions($config)
@@ -69,13 +69,20 @@ class Consumer
         $this->queue->declare();
         return $this;
     }
-    public function setCallback($call = [])
+    /**
+     * @param callable $callback
+     * @throws \Exception
+     */
+    public function setCallback($callback)
     {
-        var_dump($call);
+        if (is_callable($callback) === false) {
+            throw new \Exception("Callback $callback is not callable.");
+        }
+        $this->callback = $callback;
     }
     public function setRoutingKey($key)
     {
-        var_dump($key);
+        $this->queue->bind($this->exchange->getName(),$key);
     }
 
     public function consume()
