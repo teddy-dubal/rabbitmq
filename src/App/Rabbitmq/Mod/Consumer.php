@@ -38,6 +38,7 @@ use Swarrot\Broker\MessageProvider\PeclPackageMessageProvider;
 
 class Consumer
 {
+#https://github.com/symfony/messenger/blob/master/Transport/AmqpExt/Connection.php
 
     private $_dic, $connection, $channel, $queue;
 
@@ -52,22 +53,29 @@ class Consumer
     public function setExchangeOptions($config)
     {
         $exchange = new \AMQPExchange($this->channel);
+        $exchange->setName($config['name']);
+        $exchange->setType($config['type'] ?? AMQP_EX_TYPE_TOPIC);
+        $exchange->setFlags($config['flags'] ?? AMQP_DURABLE);
         $exchange->setArguments($config);
+        $exchange->declare();
         return $this;
     }
     public function setQueueOptions($config)
     {
         $this->queue = new \AMQPQueue($this->channel);
+        $this->queue->setName($config['name']);
+        $this->queue->setFlags($config['flags'] ?? AMQP_DURABLE);
         $this->queue->setArguments($config);
+        $this->queue->declare();
         return $this;
     }
     public function setCallback($call = [])
     {
-
+        var_dump($call);
     }
     public function setRoutingKey($key)
     {
-
+        var_dump($key);
     }
 
     public function consume()
