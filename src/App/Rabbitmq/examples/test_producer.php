@@ -20,8 +20,8 @@ $routing_keys = [
 $p                  = [
     'producers' => [
         'local' => [
-            'exchange' => 'default_direct',
-//            'exchange' => 'dead_topic',
+            // 'exchange' => 'default_direct',
+           'exchange' => 'default_topic',
         ]
     ],
 //    'consumers'   => array(
