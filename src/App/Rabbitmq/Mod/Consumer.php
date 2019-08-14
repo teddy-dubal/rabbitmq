@@ -31,16 +31,15 @@
 namespace App\Rabbitmq\Mod;
 
 use Exception;
-use Swarrot\Broker\Message;
-use Swarrot\Consumer as SConsumer;
-use Swarrot\Processor\ProcessorInterface;
+use Monolog\Logger;
 use Swarrot\Broker\MessageProvider\PeclPackageMessageProvider;
+use Swarrot\Consumer as SConsumer;
 
 class Consumer
 {
 #https://github.com/symfony/messenger/blob/master/Transport/AmqpExt/Connection.php
 
-    private $_dic, $connection, $channel, $queue,$exchange,$callback;
+    private $_dic, $connection, $channel, $queue, $exchange, $callback;
 
     public function __construct($con_params)
     {
@@ -75,20 +74,26 @@ class Consumer
      */
     public function setCallback($callback)
     {
-        if (is_callable($callback) === false) {
-            throw new \Exception("Callback $callback is not callable.");
-        }
         $this->callback = $callback;
     }
     public function setRoutingKey($key)
     {
-        $this->queue->bind($this->exchange->getName(),$key);
+        $this->queue->bind($this->exchange->getName(), $key);
     }
 
     public function consume()
     {
         $messageProvider = new PeclPackageMessageProvider($this->queue);
-        $consumer        = new SConsumer($messageProvider, new Processor());
+        $callback        = $this->callback;
+        $logger          = new Logger('rabbit');
+        $stack           = (new \Swarrot\Processor\Stack\Builder())
+            ->push('Swarrot\Processor\MemoryLimit\MemoryLimitProcessor', $logger)
+            ->push('Swarrot\Processor\MaxMessages\MaxMessagesProcessor', $logger)
+            ->push('Swarrot\Processor\ExceptionCatcher\ExceptionCatcherProcessor', $logger)
+            ->push('Swarrot\Processor\Ack\AckProcessor', $messageProvider)
+        ;
+        $processor = $stack->resolve(new $callback());
+        $consumer  = new SConsumer($messageProvider, $processor);
         $consumer->consume();
 
     }
@@ -98,24 +103,4 @@ class Consumer
         $this->_dic = $dic;
     }
 
-    public function processMessage(AMQPMessage $msg)
-    {
-        try {
-            $body = json_decode($msg->body, true);
-            call_user_func($this->callback, $body, $msg->delivery_info, $this->_dic);
-            $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
-            $this->consumed++;
-            $this->maybeStopConsumer($msg);
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-
-}
-class Processor implements ProcessorInterface
-{
-    public function process(Message $message, array $options)
-    {
-        printf("Consume message #%d\n", $message->getId());
-    }
 }

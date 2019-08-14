@@ -13,8 +13,8 @@ $p = [
     //    ),
     'consumers' => [
         'local' => [
-           'exchange' => 'default_direct',
-            'queues' => [
+            'exchange' => 'default_direct',
+            'queues'   => [
                 'direct',
                 'noty',
             ],

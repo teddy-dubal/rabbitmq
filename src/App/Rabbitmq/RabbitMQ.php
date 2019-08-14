@@ -2,32 +2,35 @@
 
 namespace App\Rabbitmq;
 
-use \Exception;
-use \Pimple\Container;
-use \Thumper\AnonConsumer;
 use \App\Rabbitmq\Mod\Consumer;
 use \App\Rabbitmq\Mod\Producer;
 use \App\Rabbitmq\Mod\RpcClient;
 use \App\Rabbitmq\Mod\RpcServer;
+use \Exception;
+use \Pimple\Container;
+use \Thumper\AnonConsumer;
 
 /**
  * App helper class to use RabbitMQ
  */
-class RabbitMQ {
+class RabbitMQ
+{
 
     protected $c; // Pimple
     protected $config;
     protected $is_debug = false;
 
-    public function __construct(Container $c) {
+    public function __construct(Container $c)
+    {
         $this->c = $c;
 
         $this->initConfig();
     }
 
-    protected function initConfig() {
+    protected function initConfig()
+    {
         if (file_exists(dirname(__FILE__) . '/config/config.inc.php')) {
-            $this->config = include(dirname(__FILE__) . '/config/config.inc.php');
+            $this->config = include dirname(__FILE__) . '/config/config.inc.php';
             if (isset($this->c['rabbitmq_conf'])) {
                 $this->config = array_replace_recursive($this->config, $this->c['rabbitmq_conf']);
             }
@@ -35,7 +38,8 @@ class RabbitMQ {
         return $this->config;
     }
 
-    protected function getConfig($key, $default = null) {
+    protected function getConfig($key, $default = null)
+    {
         return (!empty($this->config[$key])) ? $this->config[$key] : $default;
     }
 
@@ -44,7 +48,8 @@ class RabbitMQ {
      * @param boolean $debug
      * @return \App\Rabbitmq\RabbitMQ
      */
-    public function setDebug($debug = true) {
+    public function setDebug($debug = true)
+    {
         $this->is_debug = $debug;
         return $this;
     }
@@ -53,7 +58,8 @@ class RabbitMQ {
      *
      * @return boolean
      */
-    public function isDebug() {
+    public function isDebug()
+    {
         return (boolean) $this->is_debug;
     }
 
@@ -66,7 +72,8 @@ class RabbitMQ {
      * @param type $msg_arguments
      * @param type $connection
      */
-    public function publish($producer, $msg, $routing_key = '', $msg_arguments = [], $connection = 'default') {
+    public function publish($producer, $msg, $routing_key = '', $msg_arguments = [], $connection = 'default')
+    {
         if (!$this->is_debug) {
             try {
                 //if (!isset($producers[$producer])) {
@@ -86,26 +93,32 @@ class RabbitMQ {
                 }
                 $producers[$producer]->publish(json_encode($msg), $routing_key, $msg_arguments);
             } catch (Exception $e) {
-                if ($this->c->offsetExists('log'))
+                if ($this->c->offsetExists('log')) {
                     $this->c['log']->addWarning('Warning error in publish: ' . $e->getMessage());
+                }
+
             }
         } else {
             $this->synchronousPublish($msg, $routing_key);
         }
     }
 
-      public function publishWebSocket($producer, $msg, $routing_key = '', $msg_arguments = [], $connection = 'default') {
+    public function publishWebSocket($producer, $msg, $routing_key = '', $msg_arguments = [], $connection = 'default')
+    {
         try {
             $producers[$producer] = $this->getProducer($producer, $connection);
             $producers[$producer]->setExchangeReady(true);
             $producers[$producer]->publish(json_encode($msg), $routing_key, $msg_arguments);
         } catch (Exception $e) {
-            if ($this->c->offsetExists('log'))
+            if ($this->c->offsetExists('log')) {
                 $this->c['log']->addWarning('Warning error in publish ws: ' . $e->getMessage());
+            }
+
         }
     }
 
-    public function publishDelayed($producer, $msg, $routing_key = '', $ttl = 60, $msg_arguments = []) {
+    public function publishDelayed($producer, $msg, $routing_key = '', $ttl = 60, $msg_arguments = [])
+    {
         static $producers;
 
         if (!$this->is_debug) {
@@ -132,15 +145,18 @@ class RabbitMQ {
 
                 $producers[$producer]->publish(json_encode($msg), $routing_key, $msg_arguments);
             } catch (Exception $e) {
-                if ($this->c->offsetExists('log'))
+                if ($this->c->offsetExists('log')) {
                     $this->c['log']->addWarning('Warning error in publish: ' . $e->getMessage());
+                }
+
             }
         } else {
             $this->synchronousPublish($msg, $routing_key);
         }
     }
 
-    public function synchronousPublish($msg, $routing_key = '') {
+    public function synchronousPublish($msg, $routing_key = '')
+    {
         $queues = $this->getConfig('queues');
         foreach ($queues as $queue) {
             if (isset($queue['routing_key'])) {
@@ -148,15 +164,18 @@ class RabbitMQ {
                     try {
                         call_user_func([$queue['callback'], 'execute'], $msg, null);
                     } catch (Exception $e) {
-                        if ($this->c->offsetExists('log'))
+                        if ($this->c->offsetExists('log')) {
                             $this->c['log']->addWarning('Warning error in publish: ' . $e->getMessage());
+                        }
+
                     }
                 }
             }
         }
     }
 
-    protected function getConnectionParams($connection = 'default') {
+    protected function getConnectionParams($connection = 'default')
+    {
         static $conf;
         $config = $conf[$connection] ?? false;
 
@@ -173,8 +192,8 @@ class RabbitMQ {
             }
             // a string has been passed in parameter
             else {
-                $connection        = (isset($connection)) ? $connection : 'default';
-                $config            = $conf[$connection] = $config[$connection];
+                $connection = (isset($connection)) ? $connection : 'default';
+                $config     = $conf[$connection]     = $config[$connection];
             }
 
             if (!$config) {
@@ -199,13 +218,14 @@ class RabbitMQ {
             'port'     => empty($config['port']) ? 5672 : $config['port'],
             'user'     => $config['user'],
             'password' => $config['password'],
-            'vhost'    => $config['vhost']
+            'vhost'    => $config['vhost'],
         ];
     }
 
-    public function getProducer($name, $connection = 'default') {
+    public function getProducer($name, $connection = 'default')
+    {
         $config = $this->getConfig('producers');
-        if (empty($config[$name]) or ! $config = $config[$name]) {
+        if (empty($config[$name]) or !$config = $config[$name]) {
             throw new Exception(sprintf('There is no rabbitmq producer with "%s" name in config', $name));
         }
         $con_params = $this->getConnectionParams($connection);
@@ -215,10 +235,11 @@ class RabbitMQ {
         return $producer;
     }
 
-    public function getConsumer($name, $connection = 'default') {
+    public function getConsumer($name, $connection = 'default')
+    {
         $config = $this->getConfig('consumers');
 
-        if (empty($config[$name]) or ! $config = $config[$name]) {
+        if (empty($config[$name]) or !$config = $config[$name]) {
             throw new Exception(sprintf('There is no rabbitmq consumers with "%s" name in config', $name));
         }
 
@@ -229,7 +250,7 @@ class RabbitMQ {
         $this->setExchange($consumer, $config);
         echo "Connected to " . $con_params['host'] . ":" . $con_params['port'] . " (vhost:" . $con_params['vhost'] . ")\n";
         // get queues
-        $queues   = [];
+        $queues = [];
         if (!empty($config['queues'])) {
             $queue_config = $this->getConfig('queues');
             if (is_array($config['queues'])) {
@@ -248,13 +269,15 @@ class RabbitMQ {
         return $consumer;
     }
 
-    protected static function _processQueues($consumer, $config) {
+    protected static function _processQueues($consumer, $config)
+    {
 
         $queue_options = empty($config['options']) ? [] : $config['options'];
         $consumer->setQueueOptions($queue_options);
 
         if (!empty($config['callback'])) {
-            $consumer->setCallback([$config['callback'], 'execute']);
+            // $consumer->setCallback([$config['callback'], 'execute']);
+            $consumer->setCallback($config['callback']);
         }
         if (!empty($config['routing_key'])) {
             if (is_array($config['routing_key'])) {
@@ -269,7 +292,8 @@ class RabbitMQ {
         }
     }
 
-    protected function setExchange($amqp_client, $config) {
+    protected function setExchange($amqp_client, $config)
+    {
         $exchange_name   = empty($config['exchange']) ? 'default' : $config['exchange'];
         $exchange_config = $this->getConfig('exchanges');
         $exchange_config = empty($exchange_config[$exchange_name]) ? [] : $exchange_config[$exchange_name];
@@ -278,10 +302,11 @@ class RabbitMQ {
         $amqp_client->setExchangeOptions($exchange_options);
     }
 
-    public function getAnonConsumer($name, $connection = null) {
+    public function getAnonConsumer($name, $connection = null)
+    {
         $config = $this->getConfig('anon_consumers');
 
-        if (empty($config[$name]) or ! $config = $config[$name]) {
+        if (empty($config[$name]) or !$config = $config[$name]) {
             throw new Exception(sprintf('There is no rabbitmq anon consumers with "%s" name in config', $name));
         }
 
@@ -291,9 +316,9 @@ class RabbitMQ {
 
         $this->setExchange($consumer, $config);
 
-        $queue_config['options']     = ['name'        => '', 'passive'     => false, 'durable'     => false,
-            'exclusive'   => true, 'auto_delete' => true, 'nowait'      => false,
-            'arguments'   => null, 'ticket'      => null];
+        $queue_config['options'] = ['name' => '', 'passive'       => false, 'durable' => false,
+            'exclusive'                        => true, 'auto_delete' => true, 'nowait'   => false,
+            'arguments'                        => null, 'ticket'      => null];
         $queue_config['routing_key'] = $config['routing_key'];
         $queue_config['callback']    = $config['callback'];
 
@@ -302,10 +327,11 @@ class RabbitMQ {
         return $consumer;
     }
 
-    public function getRpcClient($name, $connection = 'default') {
+    public function getRpcClient($name, $connection = 'default')
+    {
         $config = $this->getConfig('rpc_clients');
 
-        if (empty($config[$name]) or ! $config = $config[$name]) {
+        if (empty($config[$name]) or !$config = $config[$name]) {
             throw new Exception(sprintf('There is no rabbitmq rpc client with "%s" name in config', $name));
         }
 
@@ -319,9 +345,10 @@ class RabbitMQ {
         return $client;
     }
 
-    public function getRpcServer($name, $connection = 'default') {
+    public function getRpcServer($name, $connection = 'default')
+    {
         $config = $this->getConfig('rpc_servers');
-        if (empty($config[$name]) or ! $config = $config[$name]) {
+        if (empty($config[$name]) or !$config = $config[$name]) {
             throw new Exception(sprintf('There is no rabbitmq rpc server with "%s" name in config', $name));
         }
         if (empty($config['callback'])) {
