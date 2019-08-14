@@ -2,10 +2,15 @@
 
 namespace App\Rabbitmq\Workers;
 
-class debugRpcCallback {
+use Swarrot\Broker\Message;
+use Swarrot\Processor\ProcessorInterface;
 
-    public static function execute($body, $delivery_info = '') {
-        return json_encode([$delivery_info, $body]);
+class debugRpcCallback implements ProcessorInterface {
+
+    public function process(Message $message, array $options)
+    {
+        // var_dump($options);
+        echo $message->getBody() . PHP_EOL;
+        return true;
     }
-
 }
