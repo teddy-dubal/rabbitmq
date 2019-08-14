@@ -2,6 +2,9 @@
 
 namespace App\Rabbitmq\Mod;
 
+use Swarrot\Broker\Message;
+use Swarrot\Broker\MessagePublisher\PeclPackageMessagePublisher;
+
 class Producer
 {
 
@@ -20,21 +23,23 @@ class Producer
         $this->_dic = $dic;
     }
 
-    public function setExchangeReady($bool = false)
+    public function setExchangeOptions($config)
     {
-        $this->exchangeReady = $bool;
+        $this->exchange = new \AMQPExchange($this->channel);
+        $this->exchange->setName($config['name']);
+        $this->exchange->setType($config['type'] ?? AMQP_EX_TYPE_TOPIC);
+        $this->exchange->setFlags($config['flags'] ?? AMQP_DURABLE);
+        $this->exchange->setArguments($config);
+        $this->exchange->declare();
+        return $this;
     }
 
     public function publish($msgBody, $routingKey = '', $msg_arguments = [])
     {
-        if (!$this->exchangeReady) {
-            //declare a durable non autodelete exchange
-            $this->channel->exchange_declare($this->exchangeOptions['name'], $this->exchangeOptions['type'], $this->exchangeOptions['passive'], $this->exchangeOptions['durable'], $this->exchangeOptions['auto_delete'], $this->exchangeOptions['internal'], $this->exchangeOptions['nowait'], $this->exchangeOptions['arguments'], $this->exchangeOptions['ticket']);
-            $this->exchangeReady = true;
-        }
-
-        $msg = new AMQPMessage($msgBody, array_merge(['content_type' => 'text/plain', 'delivery_mode' => 2], $msg_arguments));
-        $this->channel->basic_publish($msg, $this->exchangeOptions['name'], $routingKey);
+        $provider = new PeclPackageMessagePublisher($this->exchange);
+        $return   = $provider->publish(
+            new Message($msgBody, []), $routingKey
+        );
     }
 
 }
