@@ -11,10 +11,10 @@ try {
     $av     = new App\Rabbitmq\RabbitMQ($c);
     $ck     = isset($argv[1]) ? $argv[1] : 'local';
     $client = $av->getRpcClient($ck, $ck);
-    $client->addRequest('test1', $ck, $ck); //the third parameter is the request identifie
+    $client->addRequest('test1'); //the third parameter is the request identifie
     echo "Waiting for replies…\n";
     $replies = $client->getReplies();
-    var_dump($replies);
+    var_dump('REPLY : ',$replies);
 } catch (Exception $e) {
     error_log($e);
     //var_dump($e);

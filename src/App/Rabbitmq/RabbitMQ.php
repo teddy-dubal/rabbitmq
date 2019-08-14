@@ -2,13 +2,13 @@
 
 namespace App\Rabbitmq;
 
+use \Exception;
+use \Pimple\Container;
+use \Thumper\AnonConsumer;
 use \App\Rabbitmq\Mod\Consumer;
 use \App\Rabbitmq\Mod\Producer;
 use \App\Rabbitmq\Mod\RpcClient;
 use \App\Rabbitmq\Mod\RpcServer;
-use \Exception;
-use \Pimple\Container;
-use \Thumper\AnonConsumer;
 
 /**
  * App helper class to use RabbitMQ
@@ -74,7 +74,6 @@ class RabbitMQ
      */
     public function publish($producer, $msg, $routing_key = '', $msg_arguments = [], $connection = 'default')
     {
-        if (!$this->is_debug) {
             try {
                 //if (!isset($producers[$producer])) {
                 $producers[$producer] = $this->getProducer($producer, $connection);
@@ -82,7 +81,7 @@ class RabbitMQ
                 if (is_array($msg_arguments) && count($msg_arguments)) {
                     if (isset($msg_arguments['durable'])) {
                         // this is in seconds, convert it to rabbitmq values (milliseconds)
-                        $msg_arguments['delivery_mode'] = $msg_arguments['durable'] ? 2 : 1;
+                        $msg_arguments['delivery_mode'] = $msg_arguments['durable'] ? AMQP_DURABLE : AMQP_JUST_CONSUME;
                         unset($msg_arguments['durable']);
                     }
                     if (isset($msg_arguments['ttl'])) {
@@ -91,16 +90,14 @@ class RabbitMQ
                         unset($msg_arguments['ttl']);
                     }
                 }
-                $producers[$producer]->publish(json_encode($msg), $routing_key, $msg_arguments);
+                $producers[$producer]->publish($msg, $routing_key, $msg_arguments);
             } catch (Exception $e) {
                 if ($this->c->offsetExists('log')) {
                     $this->c['log']->addWarning('Warning error in publish: ' . $e->getMessage());
                 }
 
             }
-        } else {
-            $this->synchronousPublish($msg, $routing_key);
-        }
+        
     }
 
     public function publishWebSocket($producer, $msg, $routing_key = '', $msg_arguments = [], $connection = 'default')
@@ -120,8 +117,6 @@ class RabbitMQ
     public function publishDelayed($producer, $msg, $routing_key = '', $ttl = 60, $msg_arguments = [])
     {
         static $producers;
-
-        if (!$this->is_debug) {
             try {
                 if (!isset($producers[$producer])) {
                     $producers[$producer] = $this->getProducer($producer);
@@ -150,28 +145,6 @@ class RabbitMQ
                 }
 
             }
-        } else {
-            $this->synchronousPublish($msg, $routing_key);
-        }
-    }
-
-    public function synchronousPublish($msg, $routing_key = '')
-    {
-        $queues = $this->getConfig('queues');
-        foreach ($queues as $queue) {
-            if (isset($queue['routing_key'])) {
-                if ($queue['routing_key'] === '#' || ($queue['routing_key'] === $routing_key)) {
-                    try {
-                        call_user_func([$queue['callback'], 'execute'], $msg, null);
-                    } catch (Exception $e) {
-                        if ($this->c->offsetExists('log')) {
-                            $this->c['log']->addWarning('Warning error in publish: ' . $e->getMessage());
-                        }
-
-                    }
-                }
-            }
-        }
     }
 
     protected function getConnectionParams($connection = 'default')
@@ -297,7 +270,6 @@ class RabbitMQ
         $exchange_name   = empty($config['exchange']) ? 'default' : $config['exchange'];
         $exchange_config = $this->getConfig('exchanges');
         $exchange_config = empty($exchange_config[$exchange_name]) ? [] : $exchange_config[$exchange_name];
-
         $exchange_options = empty($exchange_config['exchange_options']) ? [] : $exchange_config['exchange_options'];
         $amqp_client->setExchangeOptions($exchange_options);
     }
@@ -364,7 +336,7 @@ class RabbitMQ
         $this->setExchange($server, $config);
         $server->setDic($this->c);
         $server->initServer($name);
-        $server->setCallback([$config['callback'], 'execute']);
+        $server->setCallback($config['callback']);
         $server->start();
 
         return $server;

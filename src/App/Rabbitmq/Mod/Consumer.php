@@ -32,8 +32,8 @@ namespace App\Rabbitmq\Mod;
 
 use Exception;
 use Monolog\Logger;
-use Swarrot\Broker\MessageProvider\PeclPackageMessageProvider;
 use Swarrot\Consumer as SConsumer;
+use Swarrot\Broker\MessageProvider\PeclPackageMessageProvider;
 
 class Consumer
 {
@@ -93,8 +93,10 @@ class Consumer
             ->push('Swarrot\Processor\Ack\AckProcessor', $messageProvider)
         ;
         $processor = $stack->resolve(new $callback());
-        $consumer  = new SConsumer($messageProvider, $processor);
-        $consumer->consume();
+        $consumer  = new SConsumer($messageProvider, $processor,null,$logger);
+        $consumer->consume([
+            'max_messages'=>200,
+        ]);
 
     }
 

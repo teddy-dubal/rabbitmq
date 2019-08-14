@@ -1,49 +1,67 @@
 <?php
 
-/**
- * The MIT License
- *
- * Copyright (c) 2010 Alvaro Videla
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- *
- * @category   Thumper
- * @package    Thumper
- */
-
 namespace App\Rabbitmq\Mod;
 
-use PhpAmqpLib\Connection\AMQPLazyConnection;
+use Monolog\Logger;
+use Swarrot\Broker\Message;
+use Swarrot\Consumer as SConsumer;
+use Swarrot\Processor\RPC\RpcClientProcessor;
+use Swarrot\Broker\MessageProvider\PeclPackageMessageProvider;
+use Swarrot\Broker\MessagePublisher\PeclPackageMessagePublisher;
 
-/**
- *
- *
- *
- * @category   Thumper
- * @package    Thumper
- */
-class RpcClient extends \Thumper\RpcClient {
+class RpcClient {
 
-    public function __construct($con_params) {
-        $conn = new AMQPLazyConnection($con_params['host'], $con_params['port'], $con_params['user'], $con_params['password'], $con_params['vhost']);
-        parent::__construct($conn);
+    private $_dic, $connection, $channel, $queue, $exchange, $callback;
+
+    public function __construct($con_params)
+    {
+        $con_params['login'] = $con_params['user'];
+        $this->connection    = new \AMQPConnection($con_params);
+        $this->connection->connect();
+        $this->channel = new \AMQPChannel($this->connection);
     }
 
+    public function setDic($dic)
+    {
+        $this->_dic = $dic;
+    }
+
+    public function setExchangeOptions($config)
+    {
+        $this->exchange = new \AMQPExchange($this->channel);
+        $this->exchange->setName('local-exchange');
+        $this->exchange->setType($config['type'] ?? AMQP_EX_TYPE_DIRECT);
+        $this->exchange->setFlags($config['flags'] ?? AMQP_DURABLE);
+        $this->exchange->setArguments($config);
+        $this->exchange->declare();
+        return $this;
+    }
+
+    public function initClient(){
+        $this->queue = new \AMQPQueue($this->channel);
+        $this->queue->setName('local-queue');
+        // $this->queue->setFlags($config['flags'] ?? AMQP_DURABLE);
+        //$this->queue->setArguments($config);
+        // $this->queue->declare();
+        return $this;
+    }
+    
+    public function addRequest($msgBody, $routingKey = '', $msg_arguments = [])
+    {
+        $provider = new PeclPackageMessagePublisher($this->exchange);
+        $msg = new Message($msgBody, ['correlation_id'=>'wep']);
+        $provider->publish(
+            $msg, $routingKey
+        );
+    }
+
+    public function getReplies()
+    {
+        // $messageProvider = new PeclPackageMessageProvider($this->queue);
+        // $logger          = new Logger('rabbit');
+        // $consumer  = new SConsumer($messageProvider, new RpcClientProcessor(null,$logger),null,$logger);
+        // $result = $consumer->consume(['rpc_client_correlation_id'=>'yoyo']);
+        // var_dump($result);
+
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Rabbitmq\Mod;
 
+use Monolog\Logger;
 use Swarrot\Broker\Message;
 use Swarrot\Broker\MessagePublisher\PeclPackageMessagePublisher;
 
@@ -36,9 +37,10 @@ class Producer
 
     public function publish($msgBody, $routingKey = '', $msg_arguments = [])
     {
-        $provider = new PeclPackageMessagePublisher($this->exchange);
+        $logger          = new Logger('rabbit');
+        $provider = new PeclPackageMessagePublisher($this->exchange,AMQP_NOPARAM,$logger);
         $return   = $provider->publish(
-            new Message($msgBody, []), $routingKey
+            new Message($msgBody), $routingKey
         );
     }
 

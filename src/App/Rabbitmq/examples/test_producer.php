@@ -65,28 +65,17 @@ $p = [
                 'nowait'      => false,
             ],
         ],
-    ],
-//    'queues'      => array(
-    //        'catch_all' => array(
-    //            'options'     => array(
-    //                'name' => 'App.Q.Topic.v1.catch_all',
-    //            ),
-    ////            'exchange'    => 'default_topic',
-    //            'routing_key' => '#',
-    //            'callback'    => 'App\Rabbitmq\Workers\debugWorker'
-    //        ),
-    //    ),
+    ]
 ];
 $c                  = new Pimple\Container();
-$c['rabbitmq_conf'] = $p;
+// $c['rabbitmq_conf'] = $p;
 $ck                 = isset($argv[1]) ? $argv[1] : 'local';
 $producer           = new App\Rabbitmq\RabbitMQ($c);
 //$rt_k               = $routing_keys[4];
-for ($i = 0; $i < 99; $i++) {
+for ($i = 0; $i < 100; $i++) {
     $rt_k = $routing_keys[array_rand($routing_keys)];
     $rt_k = '';
-//    var_dump($rt_k);
-    $msg = json_encode(['blabl' => 'FTW ' . $i]);
-    $producer->publish($ck, $msg, $rt_k, [], $ck);
+    $msg = json_encode(['blabla' => 'FTW ' . $i]);
+    $producer->setDebug(true)->publish($ck, $msg, $rt_k, [], $ck);
     echo " [x] Sent ", $msg, "\n";
 }
