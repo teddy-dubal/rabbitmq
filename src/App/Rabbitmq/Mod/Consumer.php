@@ -32,17 +32,23 @@ namespace App\Rabbitmq\Mod;
 
 use Exception;
 use Monolog\Logger;
-use Swarrot\Consumer as SConsumer;
 use Swarrot\Broker\MessageProvider\PeclPackageMessageProvider;
+use Swarrot\Consumer as SConsumer;
 
 class Consumer
 {
-#https://github.com/symfony/messenger/blob/master/Transport/AmqpExt/Connection.php
 
-    private $_dic, $connection, $channel, $queue, $exchange, $callback;
+    private $_dic;
+    private $logger;
+    private $connection;
+    private $channel;
+    private $queue;
+    private $exchange;
+    private $callback;
 
     public function __construct($con_params)
     {
+        $this->logger        = new Logger('consumer');
         $con_params['login'] = $con_params['user'];
         $this->connection    = new \AMQPConnection($con_params);
         $this->connection->connect();
@@ -93,9 +99,9 @@ class Consumer
             ->push('Swarrot\Processor\Ack\AckProcessor', $messageProvider)
         ;
         $processor = $stack->resolve(new $callback());
-        $consumer  = new SConsumer($messageProvider, $processor,null,$logger);
+        $consumer  = new SConsumer($messageProvider, $processor, null, $logger);
         $consumer->consume([
-            'max_messages'=>200,
+            'max_messages' => 200,
         ]);
 
     }

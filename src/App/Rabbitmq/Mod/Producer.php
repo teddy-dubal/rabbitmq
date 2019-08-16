@@ -9,10 +9,17 @@ use Swarrot\Broker\MessagePublisher\PeclPackageMessagePublisher;
 class Producer
 {
 
-    private $_dic, $connection, $channel, $queue, $exchange, $callback;
+    private $_dic;
+    private $logger;
+    private $connection;
+    private $channel;
+    private $queue;
+    private $exchange;
+    private $callback;
 
     public function __construct($con_params)
     {
+        $this->logger        = new Logger('producer');
         $con_params['login'] = $con_params['user'];
         $this->connection    = new \AMQPConnection($con_params);
         $this->connection->connect();
@@ -37,8 +44,7 @@ class Producer
 
     public function publish($msgBody, $routingKey = '', $msg_arguments = [])
     {
-        $logger          = new Logger('rabbit');
-        $provider = new PeclPackageMessagePublisher($this->exchange,AMQP_NOPARAM,$logger);
+        $provider = new PeclPackageMessagePublisher($this->exchange, AMQP_NOPARAM, $this->logger);
         $return   = $provider->publish(
             new Message($msgBody), $routingKey
         );

@@ -1,18 +1,26 @@
 <?php
 namespace App\Rabbitmq\Mod;
+
 use Monolog\Logger;
-use Swarrot\Consumer as SConsumer;
-use Swarrot\Processor\RPC\RpcServerProcessor;
 use Swarrot\Broker\MessageProvider\PeclPackageMessageProvider;
 use Swarrot\Broker\MessagePublisher\PeclPackageMessagePublisher;
+use Swarrot\Consumer as SConsumer;
+use Swarrot\Processor\RPC\RpcServerProcessor;
 
-class RpcServer 
+class RpcServer
 {
 
-    private $_dic, $connection, $channel, $queue, $exchange, $callback;
+    private $_dic;
+    private $logger;
+    private $connection;
+    private $channel;
+    private $queue;
+    private $exchange;
+    private $callback;
 
     public function __construct($con_params)
     {
+        $this->logger        = new Logger('rpc-server');
         $con_params['login'] = $con_params['user'];
         $this->connection    = new \AMQPConnection($con_params);
         $this->connection->connect();
@@ -25,14 +33,14 @@ class RpcServer
     public function setExchangeOptions($config)
     {
         $this->exchange = new \AMQPExchange($this->channel);
-        $this->exchange->setName($config['name']);
+        $this->exchange->setName('local-exchange');
         $this->exchange->setType($config['type'] ?? AMQP_EX_TYPE_TOPIC);
         $this->exchange->setFlags($config['flags'] ?? AMQP_DURABLE);
         $this->exchange->setArguments($config);
         $this->exchange->declare();
         return $this;
     }
-    
+
     /**
      * @param callable $callback
      * @throws \Exception
@@ -43,22 +51,28 @@ class RpcServer
     }
     public function setRoutingKey($key)
     {
-        $this->queue->bind($this->exchange->getName(), $key);
+        // $this->queue->bind($this->exchange->getName(), $key);
     }
-    public function initServer($name){
+    public function initServer($name)
+    {
         $this->queue = new \AMQPQueue($this->channel);
-        $this->queue->setName($name.'-queue');
-        $this->queue->setFlags( AMQP_DURABLE);
-        //$this->queue->setArguments($config);
+        $this->queue->setName($name . '-queue');
+        $this->queue->setFlags(AMQP_DURABLE);
         $this->queue->declare();
+        $this->queue->bind($this->exchange->getName(), 'azerty');
         return $this;
     }
     public function start()
     {
-        $messagePub = new PeclPackageMessagePublisher($this->exchange);
+        $messagePub      = new PeclPackageMessagePublisher($this->exchange);
+        $messageProvider = new PeclPackageMessageProvider($this->queue);
         $callback        = $this->callback;
-        $logger          = new Logger('rabbit');
-        $consumer  = new SConsumer($messagePub, new RpcServerProcessor(new $callback(),$messagePub),null,$logger);
+        $stack           = (new \Swarrot\Processor\Stack\Builder())
+            ->push('Swarrot\Processor\ExceptionCatcher\ExceptionCatcherProcessor', $this->logger)
+            ->push('Swarrot\Processor\Ack\AckProcessor', $messageProvider)
+        ;
+        $processor = $stack->resolve(new RpcServerProcessor(new $callback(), $messagePub, $this->logger));
+        $consumer  = new SConsumer($messageProvider, $processor, null, $this->logger);
         $consumer->consume([]);
     }
 

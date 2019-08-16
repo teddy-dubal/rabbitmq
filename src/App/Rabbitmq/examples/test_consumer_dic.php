@@ -11,5 +11,5 @@ $c = new Pimple\Container();
 // $c['rabbitmq_conf'] = $p;
 $ck       = isset($argv[1]) ? $argv[1] : 'local';
 $av       = new App\Rabbitmq\RabbitMQ($c);
-$consumer = $av->setDebug()->getConsumer($ck, $ck);
+$consumer = $av->setDebug()->getConsumer('email_send', $ck);
 $consumer->consume();
