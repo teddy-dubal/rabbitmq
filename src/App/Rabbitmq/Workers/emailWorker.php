@@ -2,12 +2,21 @@
 
 namespace App\Rabbitmq\Workers;
 
-class emailWorker
+use Swarrot\Broker\Message;
+use Swarrot\Processor\ProcessorInterface;
+
+class emailWorker implements ProcessorInterface
 {
-  public static function execute($body, $delivery_info, $dic)
-  {
-          
-    $object = \App\Modules\BaseController::sendMail($body, $dic);
+    private $_dic;
+
+    public function process(Message $message, array $options)
+    {
+        $body   = $message->getBody();
+        $object = \App\Modules\BaseController::sendMail($body, $this->_dic);
+    }
+
+    public function setDic($dic)
+    {
+        $this->_dic = $dic;
     }
 }
-

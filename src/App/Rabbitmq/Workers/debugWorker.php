@@ -7,10 +7,15 @@ use Swarrot\Processor\ProcessorInterface;
 
 class debugWorker implements ProcessorInterface
 {
+    private $_dic;
+
     public function process(Message $message, array $options)
     {
-        // var_dump($options);
         echo $message->getBody() . PHP_EOL;
         return true;
+    }
+    public function setDic($dic)
+    {
+        $this->_dic = $dic;
     }
 }

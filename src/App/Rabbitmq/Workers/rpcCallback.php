@@ -2,9 +2,18 @@
 
 namespace App\Rabbitmq\Workers;
 
-class rpcCallback {
+use Swarrot\Broker\Message;
+use Swarrot\Processor\ProcessorInterface;
 
-    public static function execute($body, $delivery_info, $dic) {
+class rpcCallback implements ProcessorInterface
+{
+
+    private $_dic;
+
+    public function process(Message $message, array $options)
+    {
+        $body   = $message->getBody();
+        $dic    = $this->_dic;
         $result = json_encode(['status' => 0, 'result' => ['error' => 'unknow_callback']]);
         $action = explode('::', $body['client.call_action']);
         $dic['log']->addNotice($body['client.call_action'] . json_encode($body));
@@ -25,6 +34,11 @@ class rpcCallback {
             }
         }
         return $result;
+    }
+
+    public function setDic($dic)
+    {
+        $this->_dic = $dic;
     }
 
 }

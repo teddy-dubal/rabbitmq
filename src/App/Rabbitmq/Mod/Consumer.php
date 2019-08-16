@@ -97,7 +97,9 @@ class Consumer
             ->push('Swarrot\Processor\ExceptionCatcher\ExceptionCatcherProcessor', $this->logger)
             ->push('Swarrot\Processor\Ack\AckProcessor', $messageProvider)
         ;
-        $processor = $stack->resolve(new $callback());
+        $cb = new $callback();
+        $cb->setDic($this->_dic);
+        $processor = $stack->resolve($cb);
         $consumer  = new SConsumer($messageProvider, $processor, null, $this->logger);
         $consumer->consume([
             'max_messages' => 200,
