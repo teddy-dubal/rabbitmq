@@ -91,15 +91,14 @@ class Consumer
     {
         $messageProvider = new PeclPackageMessageProvider($this->queue);
         $callback        = $this->callback;
-        $logger          = new Logger('rabbit');
         $stack           = (new \Swarrot\Processor\Stack\Builder())
-            ->push('Swarrot\Processor\MemoryLimit\MemoryLimitProcessor', $logger)
-            ->push('Swarrot\Processor\MaxMessages\MaxMessagesProcessor', $logger)
-            ->push('Swarrot\Processor\ExceptionCatcher\ExceptionCatcherProcessor', $logger)
+            ->push('Swarrot\Processor\MemoryLimit\MemoryLimitProcessor', $this->logger)
+            ->push('Swarrot\Processor\MaxMessages\MaxMessagesProcessor', $this->logger)
+            ->push('Swarrot\Processor\ExceptionCatcher\ExceptionCatcherProcessor', $this->logger)
             ->push('Swarrot\Processor\Ack\AckProcessor', $messageProvider)
         ;
         $processor = $stack->resolve(new $callback());
-        $consumer  = new SConsumer($messageProvider, $processor, null, $logger);
+        $consumer  = new SConsumer($messageProvider, $processor, null, $this->logger);
         $consumer->consume([
             'max_messages' => 200,
         ]);
