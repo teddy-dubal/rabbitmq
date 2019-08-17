@@ -40,24 +40,24 @@ class RpcClient
     public function setExchangeOptions($config)
     {
         $this->exchange = new \AMQPExchange($this->channel);
-        $this->exchange->setName('local-exchange');
+        $this->exchange->setName($config['name'] ?? 'default-exchange');
         $this->exchange->setType($config['type'] ?? AMQP_EX_TYPE_DIRECT);
         $this->exchange->setFlags($config['flags'] ?? AMQP_DURABLE);
         $this->exchange->setArguments($config);
         return $this;
     }
 
-    public function initClient()
+    public function initClient($name)
     {
         $this->queue = new \AMQPQueue($this->channel);
-        $this->queue->setName('local-queues');
+        $this->queue->setName($name . '-queue');
         $this->queue->setArguments(['x-expires' => 1000]);
         $this->queue->declare();
         $this->reply_to = \uniqid('rcp_rp_');
         $this->queue->bind($this->exchange->getName(), $this->reply_to);
         return $this;
     }
-
+    //$messageBody, $server, $requestId, $routingKey = ''
     public function addRequest($msgBody, $routingKey = 'azerty', $msg_arguments = [])
     {
         $this->correlation_id = \uniqid('rcp_cid_');

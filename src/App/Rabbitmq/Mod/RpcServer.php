@@ -33,7 +33,7 @@ class RpcServer
     public function setExchangeOptions($config)
     {
         $this->exchange = new \AMQPExchange($this->channel);
-        $this->exchange->setName('local-exchange');
+        $this->exchange->setName($config['name'] ?? 'default-exchange');
         $this->exchange->setType($config['type'] ?? AMQP_EX_TYPE_TOPIC);
         $this->exchange->setFlags($config['flags'] ?? AMQP_DURABLE);
         $this->exchange->setArguments($config);
@@ -49,10 +49,7 @@ class RpcServer
     {
         $this->callback = $callback;
     }
-    public function setRoutingKey($key)
-    {
-        // $this->queue->bind($this->exchange->getName(), $key);
-    }
+
     public function initServer($name)
     {
         $this->queue = new \AMQPQueue($this->channel);
