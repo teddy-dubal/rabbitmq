@@ -12,7 +12,8 @@ class RpcCallback implements ProcessorInterface
 
     public function process(Message $message, array $options)
     {
-        $body   = $message->getBody();
+        $data   = $message->getBody();
+        $body   = is_array($data) ? $data : json_decode($data, true);
         $dic    = $this->_dic;
         $result = json_encode(['status' => 0, 'result' => ['error' => 'unknow_callback']]);
         $action = explode('::', $body['client.call_action']);

@@ -68,6 +68,7 @@ class RpcServer
             ->push('Swarrot\Processor\ExceptionCatcher\ExceptionCatcherProcessor', $this->logger)
             ->push('Swarrot\Processor\Ack\AckProcessor', $messageProvider, $this->logger)
         ;
+        $callback->setDic($this->_dic);
         $processor = $stack->resolve(new RpcServerProcessor(new $callback(), $messagePub, $this->logger));
         $consumer  = new SConsumer($messageProvider, $processor, null, $this->logger);
         $consumer->consume([]);
