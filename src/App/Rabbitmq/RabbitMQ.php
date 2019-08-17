@@ -2,13 +2,13 @@
 
 namespace App\Rabbitmq;
 
-use Monolog\Logger;
 use \App\Rabbitmq\Mod\Consumer;
 use \App\Rabbitmq\Mod\Producer;
 use \App\Rabbitmq\Mod\RpcClient;
 use \App\Rabbitmq\Mod\RpcServer;
 use \Exception;
 use \Pimple\Container;
+use Monolog\Logger;
 
 /**
  * App helper class to use RabbitMQ
@@ -271,18 +271,19 @@ class RabbitMQ
         $consumer = new Consumer($con_params);
         $consumer->setDic($this->c);
         $this->setExchange($consumer, $config);
-        $this->logger and $this->logger->info("Connected to " . $con_params['host'] . ":" . $con_params['port'] . " (vhost:" . $con_params['vhost'] . ")\n");
+        $this->logger and $this->logger->info("[Consumer] Connected to " . $con_params['host'] . ":" . $con_params['port'] . " (vhost:" . $con_params['vhost'] . ")\n");
+        $this->logger and $this->logger->info("[Consumer] Connection name : " . $connection . " - Server name : " . $name . "\n");
         // get queues
         $queues = [];
         if (!empty($config['queues'])) {
             $queue_config = $this->getConfig('queues');
             if (is_array($config['queues'])) {
                 foreach ($config['queues'] as $queue) {
-                    echo "queue: " . $queue . "\n";
+                    $this->logger and $this->logger->info("queue: " . $queue . "\n");
                     self::_processQueues($consumer, $queue_config[$queue]);
                 }
             } else {
-                echo "queue: " . $config['queues'] . "\n";
+                $this->logger and $this->logger->info("queue: " . $config['queues'] . "\n");
                 self::_processQueues($consumer, $queue_config[$config['queues']]);
             }
         } else {
@@ -374,8 +375,8 @@ class RabbitMQ
         }
 
         $con_params = $this->getConnectionParams($connection);
-        echo "Connected to " . $con_params['host'] . ":" . $con_params['port'] . " (vhost:" . $con_params['vhost'] . ")\n";
-        echo "Connection name : " . $connection . " - Server name : " . $name . "\n";
+        $this->logger and $this->logger->info("[Rpc-Server] Connected to " . $con_params['host'] . ":" . $con_params['port'] . " (vhost:" . $con_params['vhost'] . ")\n");
+        $this->logger and $this->logger->info("[Rpc-Server] Connection name : " . $connection . " - Server name : " . $name . "\n");
 
         $server = new RpcServer($con_params);
 
