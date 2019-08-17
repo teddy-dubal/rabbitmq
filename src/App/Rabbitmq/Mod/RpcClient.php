@@ -22,6 +22,7 @@ class RpcClient
     private $callback;
     private $correlation_id;
     private $reply_to;
+    private $routing_key;
 
     public function __construct($con_params)
     {
@@ -49,22 +50,22 @@ class RpcClient
 
     public function initClient($name)
     {
-        $this->queue = new \AMQPQueue($this->channel);
-        $this->queue->setName($name . '-queue');
+        $this->routing_key = $name;
+        $this->queue       = new \AMQPQueue($this->channel);
+        $this->queue->setName($name . '-queues');
         $this->queue->setArguments(['x-expires' => 1000]);
         $this->queue->declare();
         $this->reply_to = \uniqid('rcp_rp_');
         $this->queue->bind($this->exchange->getName(), $this->reply_to);
         return $this;
     }
-    //$messageBody, $server, $requestId, $routingKey = ''
-    public function addRequest($msgBody, $routingKey = 'azerty', $msg_arguments = [])
+    public function addRequest($msgBody)
     {
         $this->correlation_id = \uniqid('rcp_cid_');
         $provider             = new PeclPackageMessagePublisher($this->exchange, AMQP_NOPARAM, $this->logger);
         $msg                  = new Message($msgBody, ['correlation_id' => $this->correlation_id, 'reply_to' => $this->reply_to]);
         $provider->publish(
-            $msg, $routingKey
+            $msg, $this->routing_key
         );
     }
 

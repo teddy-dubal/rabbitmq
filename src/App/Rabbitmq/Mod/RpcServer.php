@@ -56,7 +56,7 @@ class RpcServer
         $this->queue->setName($name . '-queue');
         $this->queue->setFlags(AMQP_DURABLE);
         $this->queue->declare();
-        $this->queue->bind($this->exchange->getName(), 'azerty');
+        $this->queue->bind($this->exchange->getName(), $name);
         return $this;
     }
     public function start()
@@ -66,7 +66,7 @@ class RpcServer
         $callback        = $this->callback;
         $stack           = (new \Swarrot\Processor\Stack\Builder())
             ->push('Swarrot\Processor\ExceptionCatcher\ExceptionCatcherProcessor', $this->logger)
-            ->push('Swarrot\Processor\Ack\AckProcessor', $messageProvider)
+            ->push('Swarrot\Processor\Ack\AckProcessor', $messageProvider, $this->logger)
         ;
         $processor = $stack->resolve(new RpcServerProcessor(new $callback(), $messagePub, $this->logger));
         $consumer  = new SConsumer($messageProvider, $processor, null, $this->logger);
