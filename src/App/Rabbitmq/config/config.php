@@ -159,7 +159,7 @@ $base_config = [
     'rpc_servers' => [
         'default' => [
             'exchange' => 'default_direct',
-            'callback' => 'App\Rabbitmq\Workers\rpcCallback',
+            'callback' => 'App\Rabbitmq\Workers\RpcCallback',
         ],
         'test'    => [
             'exchange' => 'default_direct',
