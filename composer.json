@@ -11,9 +11,6 @@
     "swarrot/swarrot": "^2.4"
   },
   "require-dev": {
-    "fzaninotto/faker": "v1.6.0",
-    "mockery/mockery": "^0.9.5",
-    "phpunit/phpunit": "^6.1",
     "monolog/monolog": "~1.7",
     "friendsofphp/php-cs-fixer": "v2.*",
     "pimple/pimple": "^3.0"
