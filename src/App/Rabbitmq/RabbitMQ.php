@@ -138,7 +138,6 @@ class RabbitMQ
     {
         try {
             $producers[$producer] = $this->getProducer($producer, $connection);
-            $producers[$producer]->setExchangeReady(true);
             $producers[$producer]->publish(json_encode($msg), $routing_key, $msg_arguments);
         } catch (Exception $e) {
             $this->logger and $this->logger->error('[publishWebSocket] error :' . $e->getMessage());
