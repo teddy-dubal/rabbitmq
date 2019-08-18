@@ -9,12 +9,40 @@ use Swarrot\Broker\MessagePublisher\PeclPackageMessagePublisher;
 class Producer
 {
 
+    /**
+     *
+     * @var Pimple\Container
+     */
     private $_dic;
+    /**
+     *
+     * @var LoggerInterface
+     */
     private $logger;
+    /**
+     *
+     * @var string
+     */
     private $connection;
+    /**
+     *
+     * @var \AMQPChannel
+     */
     private $channel;
+    /**
+     *
+     * @var \AMQPQueue
+     */
     private $queue;
+    /**
+     *
+     * @var \AMQPExchange
+     */
     private $exchange;
+    /**
+     *
+     * @var callable
+     */
     private $callback;
 
     public function __construct($con_params)
@@ -25,12 +53,24 @@ class Producer
         $this->connection->connect();
         $this->channel = new \AMQPChannel($this->connection);
     }
-
+    /**
+     *
+     * @param Pimple\Container $dic
+     *
+     * @return self
+     */
     public function setDic($dic)
     {
         $this->_dic = $dic;
+        return $this;
     }
 
+    /**
+     *
+     * @param array $config
+     *
+     * @return self
+     */
     public function setExchangeOptions($config)
     {
         $this->exchange = new \AMQPExchange($this->channel);
@@ -42,12 +82,20 @@ class Producer
         return $this;
     }
 
-    public function publish($msgBody, $routingKey = '', $msg_arguments = [])
+    /**
+     *
+     * @param string $msg
+     * @param string $routingKey
+     * @param array $msg_arguments
+     *
+     * @return self
+     */
+    public function publish($msg, $routingKey = '', $msg_arguments = [])
     {
+        $msgBody  = \is_array($msg) ? \json_encode($msg) : $msg;
         $provider = new PeclPackageMessagePublisher($this->exchange, AMQP_NOPARAM, $this->logger);
-        $return   = $provider->publish(
-            new Message($msgBody), $routingKey
-        );
+        $provider->publish(new Message($msgBody), $routingKey);
+        return $this;
     }
 
 }
