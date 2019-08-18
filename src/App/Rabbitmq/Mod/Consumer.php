@@ -31,39 +31,85 @@
 namespace App\Rabbitmq\Mod;
 
 use Exception;
-use PhpAmqpLib\Connection\AMQPLazyConnection;
-use PhpAmqpLib\Message\AMQPMessage;
+use Monolog\Logger;
+use Swarrot\Broker\MessageProvider\PeclPackageMessageProvider;
+use Swarrot\Consumer as SConsumer;
 
-/**
- *
- *
- *
- * @category   Thumper
- * @package    Thumper
- */
-class Consumer extends \Thumper\Consumer {
+class Consumer
+{
 
     private $_dic;
+    private $logger;
+    private $connection;
+    private $channel;
+    private $queue;
+    private $exchange;
+    private $callback;
 
-    public function __construct($con_params) {
-        $connection = new AMQPLazyConnection($con_params['host'], $con_params['port'], $con_params['user'], $con_params['password'], $con_params['vhost']);
-        parent::__construct($connection);
+    public function __construct($con_params)
+    {
+        $this->logger        = new Logger('consumer');
+        $con_params['login'] = $con_params['user'];
+        $this->connection    = new \AMQPConnection($con_params);
+        $this->connection->connect();
+        $this->channel = new \AMQPChannel($this->connection);
     }
 
-    public function setDic($dic) {
+    public function setExchangeOptions($config)
+    {
+        $this->exchange = new \AMQPExchange($this->channel);
+        $this->exchange->setName($config['name']);
+        $this->exchange->setType($config['type'] ?? AMQP_EX_TYPE_TOPIC);
+        $this->exchange->setFlags($config['flags'] ?? AMQP_DURABLE);
+        $this->exchange->setArguments($config);
+        $this->exchange->declare();
+        return $this;
+    }
+    public function setQueueOptions($config)
+    {
+        $this->queue = new \AMQPQueue($this->channel);
+        $this->queue->setName($config['name']);
+        $this->queue->setFlags($config['flags'] ?? AMQP_DURABLE);
+        $this->queue->setArguments($config);
+        $this->queue->declare();
+        return $this;
+    }
+    /**
+     * @param callable $callback
+     * @throws \Exception
+     */
+    public function setCallback($callback)
+    {
+        $this->callback = $callback;
+    }
+    public function setRoutingKey($key)
+    {
+        $this->queue->bind($this->exchange->getName(), $key);
+    }
+
+    public function consume()
+    {
+        $messageProvider = new PeclPackageMessageProvider($this->queue);
+        $callback        = $this->callback;
+        $stack           = (new \Swarrot\Processor\Stack\Builder())
+            ->push('Swarrot\Processor\MemoryLimit\MemoryLimitProcessor', $this->logger)
+            ->push('Swarrot\Processor\MaxMessages\MaxMessagesProcessor', $this->logger)
+            ->push('Swarrot\Processor\ExceptionCatcher\ExceptionCatcherProcessor', $this->logger)
+            ->push('Swarrot\Processor\Ack\AckProcessor', $messageProvider)
+        ;
+        $cb = new $callback();
+        $cb->setDic($this->_dic);
+        $processor = $stack->resolve($cb);
+        $consumer  = new SConsumer($messageProvider, $processor, null, $this->logger);
+        $consumer->consume([
+            'max_messages' => 200,
+        ]);
+
+    }
+
+    public function setDic($dic)
+    {
         $this->_dic = $dic;
-    }
-
-    public function processMessage(AMQPMessage $msg) {
-        try {
-            $body = json_decode($msg->body, true);
-            call_user_func($this->callback, $body, $msg->delivery_info, $this->_dic);
-            $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
-            $this->consumed++;
-            $this->maybeStopConsumer($msg);
-        } catch (Exception $e) {
-            throw $e;
-        }
     }
 
 }

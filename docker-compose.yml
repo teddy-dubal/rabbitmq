@@ -1,16 +1,24 @@
-version: "3"
+version: '3'
 services:
-    app:
-      image: webdevops/php-dev:alpine-3-php7
-      volumes:
-        - ".:/app"
-      working_dir: "/app"
-    rabbitmq:
-      image: rabbitmq:3.7.7-management-alpine
-      ports:
-        - "15673:15672"
-        - "5673:5672"
-      environment:
-        RABBITMQ_DEFAULT_USER: guest
-        RABBITMQ_DEFAULT_PASS: guest
-        RABBITMQ_DEFAULT_VHOST: "/dev"
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - '.:/app'
+    working_dir: '/app'
+  rabbitmq:
+    image: docker.aladomheure.com/docker/rabbitmq
+    ports:
+      - '15673:15672'
+      - '15675:15674'
+      - '5673:5672'
+    environment:
+      RABBITMQ_HOST: localhost
+      RABBITMQ_USERNAME: lae
+      RABBITMQ_PASSWORD: lae
+      RABBITMQ_VHOST: '/dev'
+      RABBITMQ_WS_HOST: localhost
+      RABBITMQ_WS_USER: notify_ws
+      RABBITMQ_WS_PASS: notify_ws
+      RABBITMQ_WS_VHOST: '/notify_ws'

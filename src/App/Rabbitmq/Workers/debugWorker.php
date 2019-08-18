@@ -2,10 +2,20 @@
 
 namespace App\Rabbitmq\Workers;
 
-class debugWorker
+use Swarrot\Broker\Message;
+use Swarrot\Processor\ProcessorInterface;
+
+class debugWorker implements ProcessorInterface
 {
-  public static function execute($body, $delivery_info)
-  {
-    var_dump($delivery_info['routing_key'] . ' ' .$body);
-  }
+    private $_dic;
+
+    public function process(Message $message, array $options)
+    {
+        echo $message->getBody() . PHP_EOL;
+        return true;
+    }
+    public function setDic($dic)
+    {
+        $this->_dic = $dic;
+    }
 }

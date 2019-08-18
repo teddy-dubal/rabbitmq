@@ -1,72 +1,79 @@
 <?php
-
-/**
- * The MIT License
- *
- * Copyright (c) 2010 Alvaro Videla
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- *
- * @category   Thumper
- * @package    Thumper
- */
-
 namespace App\Rabbitmq\Mod;
 
-use Exception;
-use PhpAmqpLib\Connection\AMQPLazyConnection;
-use PhpAmqpLib\Message\AMQPMessage;
+use Monolog\Logger;
+use Swarrot\Broker\MessageProvider\PeclPackageMessageProvider;
+use Swarrot\Broker\MessagePublisher\PeclPackageMessagePublisher;
+use Swarrot\Consumer as SConsumer;
+use Swarrot\Processor\RPC\RpcServerProcessor;
 
-/**
- *
- *
- *
- * @category   Thumper
- * @package    Thumper
- */
-class RpcServer extends \Thumper\RpcServer
+class RpcServer
 {
 
     private $_dic;
+    private $logger;
+    private $connection;
+    private $channel;
+    private $queue;
+    private $exchange;
+    private $callback;
 
     public function __construct($con_params)
     {
-        $conn = new AMQPLazyConnection($con_params['host'], $con_params['port'], $con_params['user'], $con_params['password'], $con_params['vhost']);
-        parent::__construct($conn);
+        $this->logger        = new Logger('rpc-server');
+        $con_params['login'] = $con_params['user'];
+        $this->connection    = new \AMQPConnection($con_params);
+        $this->connection->connect();
+        $this->channel = new \AMQPChannel($this->connection);
     }
-
     public function setDic($dic)
     {
         $this->_dic = $dic;
     }
-
-    public function processMessage(AMQPMessage $msg)
+    public function setExchangeOptions($config)
     {
-        try {
-            $body = json_decode($msg->body, true);
-            $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
-            $result = call_user_func($this->callback, $body, $msg->delivery_info, $this->_dic);
-            $this->sendReply($result, $msg->get('reply_to'), $msg->get('correlation_id'));
-        } catch (Exception $e) {
-            $this->sendReply('error: ' . $e->getMessage(), $msg->get('reply_to'), null);
-        }
+        $this->exchange = new \AMQPExchange($this->channel);
+        $this->exchange->setName($config['name'] ?? 'default-exchange');
+        $this->exchange->setType($config['type'] ?? AMQP_EX_TYPE_TOPIC);
+        $this->exchange->setFlags($config['flags'] ?? AMQP_DURABLE);
+        $this->exchange->setArguments($config);
+        $this->exchange->declare();
+        return $this;
+    }
+
+    /**
+     * @param callable $callback
+     * @throws \Exception
+     */
+    public function setCallback($callback)
+    {
+        $this->callback = $callback;
+    }
+
+    public function initServer($name)
+    {
+        $this->queue = new \AMQPQueue($this->channel);
+        $this->queue->setName($name . '-queue');
+        $this->queue->setFlags(AMQP_DURABLE);
+        $this->queue->declare();
+        $this->queue->bind($this->exchange->getName(), $name);
+        return $this;
+    }
+    public function start()
+    {
+        $messagePub      = new PeclPackageMessagePublisher($this->exchange);
+        $messageProvider = new PeclPackageMessageProvider($this->queue);
+        $callback        = $this->callback;
+        $stack           = (new \Swarrot\Processor\Stack\Builder())
+            ->push('Swarrot\Processor\ExceptionCatcher\ExceptionCatcherProcessor', $this->logger)
+            ->push('Swarrot\Processor\Ack\AckProcessor', $messageProvider, $this->logger)
+        ;
+        $cb = new $callback();
+        $cb->setDic($this->_dic);
+
+        $processor = $stack->resolve(new RpcServerProcessor($cb, $messagePub, $this->logger));
+        $consumer  = new SConsumer($messageProvider, $processor, null, $this->logger);
+        $consumer->consume([]);
     }
 
 }

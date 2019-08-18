@@ -3,79 +3,76 @@
 $base_config = [
     'connections' => [
         'default'   => [
-            'lazy'     => true,
             'host'     => 'rabbitmq',
             'port'     => 5672,
-            'user'     => 'guest',
-            'password' => 'guest',
-            'vhost'    => '/prod'
+            'user'     => 'lae',
+            'password' => 'lae',
+            'vhost'    => '/prod',
         ],
         'test'      => [
-            'lazy'     => true,
             'host'     => 'rabbitmq',
             'port'     => 5672,
-            'user'     => 'guest',
-            'password' => 'guest',
-            'vhost'    => '/dev'
+            'user'     => 'lae',
+            'password' => 'lae',
+            'vhost'    => '/dev',
         ],
         'local'     => [
-            'lazy'     => true,
             'host'     => 'rabbitmq',
             'port'     => 5672,
-            'user'     => 'guest',
-            'password' => 'guest',
-            'vhost'    => '/dev'
+            'user'     => 'lae',
+            'password' => 'lae',
+            'vhost'    => '/dev',
         ],
         'notify_ws' => [
             'host'     => 'lae_rabbitmq',
             'port'     => 5672,
-            'user'     => 'guest',
-            'password' => 'guest',
-            'vhost'    => '/notify_ws'
-        ]
+            'user'     => 'lae',
+            'password' => 'lae',
+            'vhost'    => '/notify_ws',
+        ],
     ],
     'producers'   => [
         'default'   => [
-            'exchange' => 'default_topic'
+            'exchange' => 'default_topic',
         ],
         'local'     => [
-            'exchange' => 'default_topic'
+            'exchange' => 'default_topic',
         ],
         'notify_ws' => [
-            'exchange' => 'notify_ws'
-        ]
+            'exchange' => 'notify_ws',
+        ],
     ],
     'consumers'   => [
         'email_send'                 => [
             'exchange' => 'default_topic',
             'queues'   => [
-                'email_send'
-            ]
+                'email_send',
+            ],
         ],
         'test'                       => [
             'exchange' => 'default_topic',
             'queues'   => [
-                'catch_all'
-            ]
+                'catch_all',
+            ],
         ],
         'local'                      => [
             'exchange' => 'default_topic',
             'queues'   => [
-                'catch_all'
-            ]
+                'catch_all',
+            ],
         ],
         'base_delayed_do_not_launch' => [
             'exchange' => 'default_topic',
             'queues'   => [
-                'delayed'
-            ]
+                'delayed',
+            ],
         ],
         'dead_letter'                => [
             'exchange' => 'dead_topic',
             'queues'   => [
-                'dead_letter'
-            ]
-        ]
+                'dead_letter',
+            ],
+        ],
     ],
     'exchanges'   => [
         'default_topic'  => [
@@ -87,7 +84,7 @@ $base_config = [
                 'auto_delete' => false,
                 'internal'    => false,
                 'nowait'      => false,
-            ]
+            ],
         ],
         'default_direct' => [
             'exchange_options' => [
@@ -98,7 +95,7 @@ $base_config = [
                 'auto_delete' => false,
                 'internal'    => false,
                 'nowait'      => false,
-            ]
+            ],
         ],
         'dead_topic'     => [
             'exchange_options' => [
@@ -109,7 +106,7 @@ $base_config = [
                 'auto_delete' => false,
                 'internal'    => false,
                 'nowait'      => false,
-            ]
+            ],
         ],
         'notify_ws'      => [
             'exchange_options' => [
@@ -120,7 +117,7 @@ $base_config = [
                 'auto_delete' => false,
                 'internal'    => false,
                 'nowait'      => false,
-            ]
+            ],
         ],
     ],
     'queues'      => [
@@ -129,21 +126,21 @@ $base_config = [
                 'name' => 'App.Q.Topic.v1.email_send',
             ],
             'routing_key' => 'email.send',
-            'callback'    => 'App\Rabbitmq\Workers\emailWorker'
+            'callback'    => 'App\Rabbitmq\Workers\emailWorker',
         ],
         'catch_all'   => [
             'options'     => [
                 'name' => 'App.Q.Topic.v1.catch_all',
             ],
             'routing_key' => '#',
-            'callback'    => 'App\Rabbitmq\Workers\debugWorker'
+            'callback'    => 'App\Rabbitmq\Workers\debugWorker',
         ],
         'dead_letter' => [
             'options'     => [
                 'name' => 'App.Q.Topic.v1.dead_letter',
             ],
             'routing_key' => '#',
-            'callback'    => 'App\Rabbitmq\Workers\deadLetterWorker'
+            'callback'    => 'App\Rabbitmq\Workers\deadLetterWorker',
         ],
         'delayed'     => [
             'options'     => [
@@ -151,27 +148,27 @@ $base_config = [
                 'arguments' => [
                     'x-dead-letter-exchange' => [
                         'S',
-                        'App.E.Topic.v0.Dead'
-                    ]
-                ]
+                        'App.E.Topic.v0.Dead',
+                    ],
+                ],
             ],
             'routing_key' => 'delayed.#',
-            'callback'    => 'App\Rabbitmq\Workers\debugWorker'
-        ]
+            'callback'    => 'App\Rabbitmq\Workers\debugWorker',
+        ],
     ],
     'rpc_servers' => [
         'default' => [
             'exchange' => 'default_direct',
-            'callback' => 'App\Rabbitmq\Workers\rpcCallback'
+            'callback' => 'App\Rabbitmq\Workers\RpcCallback',
         ],
         'test'    => [
             'exchange' => 'default_direct',
-            'callback' => 'App\Rabbitmq\Workers\debugRpcCallback'
+            'callback' => 'App\Rabbitmq\Workers\debugRpcCallback',
         ],
         'local'   => [
             'exchange' => 'default_direct',
-            'callback' => 'App\Rabbitmq\Workers\debugRpcCallback'
-        ]
+            'callback' => 'App\Rabbitmq\Workers\debugRpcCallback',
+        ],
     ],
     'rpc_clients' => [
         'default' => [
@@ -182,6 +179,6 @@ $base_config = [
         ],
         'local'   => [
             'exchange' => 'default_direct',
-        ]
+        ],
     ],
 ];
