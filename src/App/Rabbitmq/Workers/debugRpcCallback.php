@@ -2,10 +2,19 @@
 
 namespace App\Rabbitmq\Workers;
 
-class debugRpcCallback {
+use Swarrot\Broker\Message;
+use Swarrot\Processor\ProcessorInterface;
 
-    public static function execute($body, $delivery_info = '') {
-        return json_encode([$delivery_info, $body]);
+class debugRpcCallback implements ProcessorInterface
+{
+    private $_dic;
+
+    public function process(Message $message, array $options)
+    {
+        return '[' . date('Y-m-d H:i:s') . '] ' . $message->getBody();
     }
-
+    public function setDic($dic)
+    {
+        $this->_dic = $dic;
+    }
 }
