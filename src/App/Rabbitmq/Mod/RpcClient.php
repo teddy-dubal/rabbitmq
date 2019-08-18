@@ -13,15 +13,55 @@ use Swarrot\Processor\RPC\RpcClientProcessor;
 class RpcClient
 {
 
+    /**
+     *
+     * @var Pimple\Container
+     */
     private $_dic;
+    /**
+     *
+     * @var LoggerInterface
+     */
     private $logger;
+    /**
+     *
+     * @var string
+     */
     private $connection;
+    /**
+     *
+     * @var \AMQPChannel
+     */
     private $channel;
+    /**
+     *
+     * @var \AMQPQueue
+     */
     private $queue;
+    /**
+     *
+     * @var \AMQPExchange
+     */
     private $exchange;
+    /**
+     *
+     * @var callable
+     */
     private $callback;
+    /**
+     *
+     * @var string
+     */
     private $correlation_id;
+    /**
+     *
+     * @var string
+     */
     private $reply_to;
+    /**
+     *
+     * @var string
+     */
     private $routing_key;
 
     public function __construct($con_params)
@@ -32,12 +72,23 @@ class RpcClient
         $this->connection->connect();
         $this->channel = new \AMQPChannel($this->connection);
     }
-
+    /**
+     *
+     * @param Pimple\Container $dic
+     *
+     * @return self
+     */
     public function setDic($dic)
     {
         $this->_dic = $dic;
+        return $this;
     }
-
+    /**
+     *
+     * @param array $config
+     *
+     * @return self
+     */
     public function setExchangeOptions($config)
     {
         $this->exchange = new \AMQPExchange($this->channel);
@@ -47,7 +98,12 @@ class RpcClient
         $this->exchange->setArguments($config);
         return $this;
     }
-
+    /**
+     *
+     * @param string $name
+     *
+     * @return self
+     */
     public function initClient($name)
     {
         $this->routing_key = $name;
@@ -59,16 +115,26 @@ class RpcClient
         $this->queue->bind($this->exchange->getName(), $this->reply_to);
         return $this;
     }
-    public function addRequest($msgBody)
+
+    /**
+     *
+     * @param string $msg
+     *
+     * @return self
+     */
+    public function addRequest($msg)
     {
+        $msgBody              = \is_array($msg) ? \json_encode($msg) : $msg;
         $this->correlation_id = \uniqid('rcp_cid_');
         $provider             = new PeclPackageMessagePublisher($this->exchange, AMQP_NOPARAM, $this->logger);
         $msg                  = new Message($msgBody, ['correlation_id' => $this->correlation_id, 'reply_to' => $this->reply_to]);
-        $provider->publish(
-            $msg, $this->routing_key
-        );
+        $provider->publish($msg, $this->routing_key);
+        return $this;
     }
-
+    /**
+     *
+     * @return string
+     */
     public function getReplies()
     {
         $messageProvider = new PeclPackageMessageProvider($this->queue);

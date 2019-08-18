@@ -10,12 +10,40 @@ use Swarrot\Processor\RPC\RpcServerProcessor;
 class RpcServer
 {
 
+    /**
+     *
+     * @var Pimple\Container
+     */
     private $_dic;
+    /**
+     *
+     * @var LoggerInterface
+     */
     private $logger;
+    /**
+     *
+     * @var string
+     */
     private $connection;
+    /**
+     *
+     * @var \AMQPChannel
+     */
     private $channel;
+    /**
+     *
+     * @var \AMQPQueue
+     */
     private $queue;
+    /**
+     *
+     * @var \AMQPExchange
+     */
     private $exchange;
+    /**
+     *
+     * @var callable
+     */
     private $callback;
 
     public function __construct($con_params)
@@ -26,10 +54,24 @@ class RpcServer
         $this->connection->connect();
         $this->channel = new \AMQPChannel($this->connection);
     }
+    /**
+     *
+     * @param Pimple\Container $dic
+     *
+     * @return self
+     */
     public function setDic($dic)
     {
         $this->_dic = $dic;
+        return $this;
     }
+    /**
+     *
+     * @param array $config
+     *
+     * @return self
+     */
+
     public function setExchangeOptions($config)
     {
         $this->exchange = new \AMQPExchange($this->channel);
@@ -49,6 +91,12 @@ class RpcServer
     {
         $this->callback = $callback;
     }
+    /**
+     *
+     * @param string $name
+     *
+     * @return self
+     */
 
     public function initServer($name)
     {
@@ -59,6 +107,7 @@ class RpcServer
         $this->queue->bind($this->exchange->getName(), $name);
         return $this;
     }
+
     public function start()
     {
         $messagePub      = new PeclPackageMessagePublisher($this->exchange);
