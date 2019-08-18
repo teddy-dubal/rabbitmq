@@ -30,20 +30,48 @@
 
 namespace App\Rabbitmq\Mod;
 
-use Exception;
 use Monolog\Logger;
+use Pimple\Container;
+use Psr\Log\LoggerInterface;
 use Swarrot\Broker\MessageProvider\PeclPackageMessageProvider;
 use Swarrot\Consumer as SConsumer;
 
 class Consumer
 {
-
+    /**
+     *
+     * @var Pimple\Container
+     */
     private $_dic;
+    /**
+     *
+     * @var LoggerInterface
+     */
     private $logger;
+    /**
+     *
+     * @var string
+     */
     private $connection;
+    /**
+     *
+     * @var \AMQPChannel
+     */
     private $channel;
+    /**
+     *
+     * @var \AMQPQueue
+     */
     private $queue;
+    /**
+     *
+     * @var \AMQPExchange
+     */
     private $exchange;
+    /**
+     *
+     * @var callable
+     */
     private $callback;
 
     public function __construct($con_params)
@@ -54,7 +82,12 @@ class Consumer
         $this->connection->connect();
         $this->channel = new \AMQPChannel($this->connection);
     }
-
+    /**
+     *
+     * @param array $config
+     *
+     * @return self
+     */
     public function setExchangeOptions($config)
     {
         $this->exchange = new \AMQPExchange($this->channel);
@@ -65,6 +98,12 @@ class Consumer
         $this->exchange->declare();
         return $this;
     }
+    /**
+     *
+     * @param array $config
+     *
+     * @return self
+     */
     public function setQueueOptions($config)
     {
         $this->queue = new \AMQPQueue($this->channel);
@@ -75,16 +114,26 @@ class Consumer
         return $this;
     }
     /**
+     *
      * @param callable $callback
-     * @throws \Exception
+     *
+     * @return self
      */
     public function setCallback($callback)
     {
         $this->callback = $callback;
+        return $this;
     }
+    /**
+     *
+     * @param string $key
+     *
+     * @return self
+     */
     public function setRoutingKey($key)
     {
         $this->queue->bind($this->exchange->getName(), $key);
+        return $this;
     }
 
     public function consume()
@@ -102,14 +151,21 @@ class Consumer
         $processor = $stack->resolve($cb);
         $consumer  = new SConsumer($messageProvider, $processor, null, $this->logger);
         $consumer->consume([
-            'max_messages' => 200,
+            'max_messages' => 100,
         ]);
 
     }
+    /**
+     *
+     * @param Pimple\Container $dic
+     *
+     * @return self
+     */
 
     public function setDic($dic)
     {
         $this->_dic = $dic;
+        return $this;
     }
 
 }

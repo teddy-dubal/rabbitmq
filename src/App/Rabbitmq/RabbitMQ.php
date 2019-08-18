@@ -2,13 +2,13 @@
 
 namespace App\Rabbitmq;
 
+use Monolog\Logger;
 use \App\Rabbitmq\Mod\Consumer;
 use \App\Rabbitmq\Mod\Producer;
 use \App\Rabbitmq\Mod\RpcClient;
 use \App\Rabbitmq\Mod\RpcServer;
 use \Exception;
 use \Pimple\Container;
-use Monolog\Logger;
 
 /**
  * App helper class to use RabbitMQ
@@ -138,7 +138,7 @@ class RabbitMQ
     {
         try {
             $producers[$producer] = $this->getProducer($producer, $connection);
-            $producers[$producer]->publish(json_encode($msg), $routing_key, $msg_arguments);
+            $producers[$producer]->publish($msg, $routing_key, $msg_arguments);
         } catch (Exception $e) {
             $this->logger and $this->logger->error('[publishWebSocket] error :' . $e->getMessage());
         }
@@ -168,7 +168,7 @@ class RabbitMQ
 
             $routing_key = 'delayed.' . $routing_key;
 
-            $producers[$producer]->publish(json_encode($msg), $routing_key, $msg_arguments);
+            $producers[$producer]->publish($msg, $routing_key, $msg_arguments);
         } catch (Exception $e) {
             $this->logger and $this->logger->error('[publishDelayed] error :' . $e->getMessage());
 
