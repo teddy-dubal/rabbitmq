@@ -34,6 +34,7 @@ use Monolog\Logger;
 use Pimple\Container;
 use Psr\Log\LoggerInterface;
 use Swarrot\Broker\MessageProvider\PeclPackageMessageProvider;
+use Swarrot\Broker\MessagePublisher\PeclPackageMessagePublisher;
 use Swarrot\Consumer as SConsumer;
 
 class Consumer
@@ -139,10 +140,13 @@ class Consumer
     public function consume()
     {
         $messageProvider = new PeclPackageMessageProvider($this->queue);
-        $callback        = $this->callback;
-        $stack           = (new \Swarrot\Processor\Stack\Builder())
+        $provider        = new PeclPackageMessagePublisher($this->exchange, AMQP_NOPARAM, $this->logger);
+
+        $callback = $this->callback;
+        $stack    = (new \Swarrot\Processor\Stack\Builder())
             ->push('Swarrot\Processor\MemoryLimit\MemoryLimitProcessor', $this->logger)
             ->push('Swarrot\Processor\MaxMessages\MaxMessagesProcessor', $this->logger)
+            ->push('Swarrot\Processor\Retry\RetryProcessor', $provider, $this->logger)
             ->push('Swarrot\Processor\ExceptionCatcher\ExceptionCatcherProcessor', $this->logger)
             ->push('Swarrot\Processor\Ack\AckProcessor', $messageProvider)
         ;
@@ -151,7 +155,8 @@ class Consumer
         $processor = $stack->resolve($cb);
         $consumer  = new SConsumer($messageProvider, $processor, null, $this->logger);
         $consumer->consume([
-            'max_messages' => 100,
+            'max_messages'      => 100,
+            'retry_key_pattern' => 'key_%attempt%',
         ]);
 
     }

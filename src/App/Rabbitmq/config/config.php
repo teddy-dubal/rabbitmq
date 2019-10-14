@@ -43,31 +43,33 @@ $base_config = [
         ],
     ],
     'consumers'   => [
-        'email_send'                 => [
+        'email_send'  => [
             'exchange' => 'default_topic',
             'queues'   => [
                 'email_send',
             ],
         ],
-        'test'                       => [
+        'test'        => [
             'exchange' => 'default_topic',
             'queues'   => [
                 'catch_all',
             ],
         ],
-        'local'                      => [
+        'local'       => [
             'exchange' => 'default_topic',
             'queues'   => [
                 'catch_all',
             ],
         ],
-        'base_delayed_do_not_launch' => [
-            'exchange' => 'default_topic',
+        'app_delay'   => [
+            'exchange' => 'default_direct',
             'queues'   => [
-                'delayed',
+                'app_delay_1',
+                // 'app_delay_2',
+                // 'app_delay_3',
             ],
         ],
-        'dead_letter'                => [
+        'dead_letter' => [
             'exchange' => 'dead_topic',
             'queues'   => [
                 'dead_letter',
@@ -88,7 +90,7 @@ $base_config = [
         ],
         'default_direct' => [
             'exchange_options' => [
-                'name'        => 'App.E.direct.v0.default',
+                'name'        => 'App.E.Direct.v0.default',
                 'type'        => 'direct',
                 'passive'     => false,
                 'durable'     => true,
@@ -123,7 +125,7 @@ $base_config = [
     'queues'      => [
         'email_send'  => [
             'options'     => [
-                'name' => 'App.Q.Topic.v1.email_send',
+                'name' => 'App.Q.Direct.v1.email_send',
             ],
             'routing_key' => 'email.send',
             'callback'    => 'App\Rabbitmq\Workers\emailWorker',
@@ -133,6 +135,17 @@ $base_config = [
                 'name' => 'App.Q.Topic.v1.catch_all',
             ],
             'routing_key' => '#',
+            'callback'    => 'App\Rabbitmq\Workers\debugWorker',
+        ],
+        'app_delay_1' => [
+            'options'     => [
+                'name'                      => 'App.Q.Direct.v1.app_delay_1',
+                'x-message-ttl'             => 30000,
+                'x-dead-letter-exchange'    => 'app_delay',
+                'x-dead-letter-routing-key' => 'app_delay',
+
+            ],
+            'routing_key' => 'app_delay',
             'callback'    => 'App\Rabbitmq\Workers\debugWorker',
         ],
         'dead_letter' => [
