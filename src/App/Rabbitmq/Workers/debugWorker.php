@@ -12,7 +12,8 @@ class debugWorker implements ProcessorInterface
     public function process(Message $message, array $options)
     {
         echo $message->getBody() . PHP_EOL;
-        return true;
+        throw new \Exception("Error Processing Request", 1);
+        //return true;
     }
     public function setDic($dic)
     {

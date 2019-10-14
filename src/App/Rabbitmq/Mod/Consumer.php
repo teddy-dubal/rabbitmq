@@ -146,8 +146,8 @@ class Consumer
         $stack    = (new \Swarrot\Processor\Stack\Builder())
             ->push('Swarrot\Processor\MemoryLimit\MemoryLimitProcessor', $this->logger)
             ->push('Swarrot\Processor\MaxMessages\MaxMessagesProcessor', $this->logger)
+            // ->push('Swarrot\Processor\ExceptionCatcher\ExceptionCatcherProcessor', $this->logger)
             ->push('Swarrot\Processor\Retry\RetryProcessor', $provider, $this->logger)
-            ->push('Swarrot\Processor\ExceptionCatcher\ExceptionCatcherProcessor', $this->logger)
             ->push('Swarrot\Processor\Ack\AckProcessor', $messageProvider)
         ;
         $cb = new $callback();

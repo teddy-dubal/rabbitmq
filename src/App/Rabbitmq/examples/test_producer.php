@@ -65,17 +65,18 @@ $p = [
                 'nowait'      => false,
             ],
         ],
-    ]
+    ],
 ];
-$c                  = new Pimple\Container();
+$c = new Pimple\Container();
 // $c['rabbitmq_conf'] = $p;
-$ck                 = isset($argv[1]) ? $argv[1] : 'local';
-$producer           = new App\Rabbitmq\RabbitMQ($c);
+$t        = isset($argv[1]) ? $argv[1] : 'local';
+$ck       = isset($argv[2]) ? $argv[2] : 'local';
+$producer = new App\Rabbitmq\RabbitMQ($c);
 //$rt_k               = $routing_keys[4];
-for ($i = 0; $i < 100; $i++) {
+for ($i = 0; $i < 1; $i++) {
     $rt_k = $routing_keys[array_rand($routing_keys)];
     $rt_k = '';
-    $msg = json_encode(['blabla' => 'FTW ' . $i]);
-    $producer->setDebug(true)->publish($ck, $msg, $rt_k, [], $ck);
+    $msg  = json_encode(['blabla' => 'FTW ' . $i]);
+    $producer->setDebug(true)->publish($t, $msg, $rt_k, [], $ck);
     echo " [x] Sent ", $msg, "\n";
 }

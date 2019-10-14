@@ -145,7 +145,7 @@ $base_config = [
                 'x-dead-letter-routing-key' => 'app_delay',
 
             ],
-            'routing_key' => 'app_delay',
+            'routing_key' => 'app_delay_1',
             'callback'    => 'App\Rabbitmq\Workers\debugWorker',
         ],
         'dead_letter' => [
