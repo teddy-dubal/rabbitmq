@@ -23,7 +23,7 @@ class RpcCallback implements ProcessorInterface
             $object     = new $action[0]($this->_dic);
             $result     = $object->{$action[1]}($body);
             $time       = microtime(true) - $time_start;
-            $this->_dic['log']->debug(sprintf('[RCP-CALLBACK] action %s in %s => %s', $body['client.call_action'], strval($time), json_decode($result, true)));
+            $this->_dic['log']->debug(sprintf('[RCP-CALLBACK] action %s in %s => %s', $body['client.call_action'], strval($time), $result));
         }
         return $result;
     }
