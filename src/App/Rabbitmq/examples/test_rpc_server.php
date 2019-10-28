@@ -1,5 +1,7 @@
 <?php
 
+use Monolog\Logger;
+
 if (file_exists(__DIR__ . '/../../../../vendor/autoload.php')) {
     require __DIR__ . '/../../../../vendor/autoload.php';
 } else {
@@ -7,6 +9,7 @@ if (file_exists(__DIR__ . '/../../../../vendor/autoload.php')) {
 }
 
 $c                           = new \Pimple\Container();
+$c['log']                    = new Logger('rpc_server');
 $options['reconnect_period'] = 3;
 $ck                          = isset($argv[1]) ? $argv[1] : 'local';
 while (true) {
