@@ -108,7 +108,7 @@ class RpcClient
     {
         $this->routing_key = $name;
         $this->queue       = new \AMQPQueue($this->channel);
-        $this->queue->setName($name . '-queues');
+        $this->queue->setName(substr(sha1(uniqid(mt_rand(), true)), 0, 10));
         $this->queue->setArguments(['x-expires' => 1000]);
         $this->queue->declare();
         $this->reply_to = \uniqid('rcp_rp_');
