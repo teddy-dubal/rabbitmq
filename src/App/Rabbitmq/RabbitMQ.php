@@ -2,13 +2,13 @@
 
 namespace App\Rabbitmq;
 
-use Monolog\Logger;
+use \Exception;
+use \Pimple\Container;
+use Psr\Log\LoggerInterface;
 use \App\Rabbitmq\Mod\Consumer;
 use \App\Rabbitmq\Mod\Producer;
 use \App\Rabbitmq\Mod\RpcClient;
 use \App\Rabbitmq\Mod\RpcServer;
-use \Exception;
-use \Pimple\Container;
 
 /**
  * App helper class to use RabbitMQ
@@ -34,6 +34,7 @@ class RabbitMQ
     /**
      * Undocumented function
      *
+     * @param \Pimple\Container $c
      * @param \Pimple\Container $c
      */
     public function __construct(Container $c, $logger = null)
