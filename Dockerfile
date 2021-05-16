@@ -2,7 +2,7 @@
 # PHP application Docker container
 #++++++++++++++++++++++++++++++++++++++
 
-FROM webdevops/php:7.3
+FROM webdevops/php:7.4
 LABEL author="Teddy Dona <teddy.dona@gmail.com>"
 
 RUN docker-service disable postfix \
