@@ -350,11 +350,9 @@ class RabbitMQ
         }
 
         $con_params = $this->getConnectionParams($connection);
-
-        $client = new RpcClient($con_params);
+        $client     = new RpcClient($con_params, $this->logger);
         $this->setExchange($client, $config);
         $client->initClient($name);
-
         return $client;
     }
     /**
@@ -379,7 +377,7 @@ class RabbitMQ
         $this->logger and $this->logger->info("[Rpc-Server] Connected to " . $con_params['host'] . ":" . $con_params['port'] . " (vhost:" . $con_params['vhost'] . ")\n");
         $this->logger and $this->logger->info("[Rpc-Server] Connection name : " . $connection . " - Server name : " . $name . "\n");
 
-        $server = new RpcServer($con_params);
+        $server = new RpcServer($con_params, $this->logger);
 
         $this->setExchange($server, $config);
         $server->setDic($this->c);

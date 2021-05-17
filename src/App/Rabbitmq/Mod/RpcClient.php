@@ -2,13 +2,13 @@
 
 namespace App\Rabbitmq\Mod;
 
+use App\Rabbitmq\Processor\RPC\RpcClientProcessor;
 use Monolog\Logger;
 use Swarrot\Broker\Message;
 use Swarrot\Broker\MessageProvider\PeclPackageMessageProvider;
 use Swarrot\Broker\MessagePublisher\PeclPackageMessagePublisher;
 use Swarrot\Consumer as SConsumer;
 use Swarrot\Processor\ProcessorInterface;
-use Swarrot\Processor\RPC\RpcClientProcessor;
 
 class RpcClient
 {
@@ -64,9 +64,9 @@ class RpcClient
      */
     private $routing_key;
 
-    public function __construct($con_params)
+    public function __construct($con_params, $logger = null)
     {
-        $this->logger        = new Logger('rpc-client');
+        $this->logger        = $logger ?? new Logger('rpc-client');
         $con_params['login'] = $con_params['user'];
         $this->connection    = new \AMQPConnection($con_params);
         $this->connection->connect();
@@ -147,7 +147,7 @@ class RpcClient
 class Result implements ProcessorInterface
 {
     private $result;
-    public function process(Message $message, array $options)
+    public function process(Message $message, array $options): bool
     {
         $this->result = $message->getBody();
         return $this->result;
