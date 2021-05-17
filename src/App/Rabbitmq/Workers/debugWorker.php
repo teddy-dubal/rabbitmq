@@ -9,7 +9,7 @@ class debugWorker implements ProcessorInterface
 {
     private $_dic;
 
-    public function process(Message $message, array $options)
+    public function process(Message $message, array $options):bool
     {
         echo $message->getBody() . PHP_EOL;
         return true;

@@ -9,8 +9,9 @@ class RpcCallback implements ProcessorInterface
 {
 
     private $_dic;
+    private $msg;
 
-    public function process(Message $message, array $options)
+    public function process(Message $message, array $options): bool
     {
         $data   = $message->getBody();
         $body   = is_array($data) ? $data : json_decode($data, true);
@@ -21,11 +22,16 @@ class RpcCallback implements ProcessorInterface
         if (class_exists($action[0]) && method_exists($action[0], $action[1])) {
             $time_start = microtime(true);
             $object     = new $action[0]($this->_dic);
-            $result     = $object->{$action[1]}($body);
+            $this->msg  = $object->{$action[1]}($body);
             $time       = microtime(true) - $time_start;
             $this->_dic['log']->debug(sprintf('[RCP-CALLBACK] action %s in %s => %s', $body['client.call_action'], strval($time), $result));
         }
-        return $result;
+        return true;
+    }
+
+    public function result()
+    {
+        return $this->msg;
     }
 
     public function setDic($dic)

@@ -1,11 +1,11 @@
 <?php
 namespace App\Rabbitmq\Mod;
 
+use App\Rabbitmq\Processor\RPC\RpcServerProcessor;
 use Monolog\Logger;
 use Swarrot\Broker\MessageProvider\PeclPackageMessageProvider;
 use Swarrot\Broker\MessagePublisher\PeclPackageMessagePublisher;
 use Swarrot\Consumer as SConsumer;
-use Swarrot\Processor\RPC\RpcServerProcessor;
 
 class RpcServer
 {
@@ -46,9 +46,9 @@ class RpcServer
      */
     private $callback;
 
-    public function __construct($con_params)
+    public function __construct($con_params, $logger = null)
     {
-        $this->logger        = new Logger('rpc-server');
+        $this->logger        = $logger ?? new Logger('rpc-server');
         $con_params['login'] = $con_params['user'];
         $this->connection    = new \AMQPConnection($con_params);
         $this->connection->connect();
