@@ -109,10 +109,14 @@ class RpcClient
         $this->routing_key = $name;
         $this->queue       = new \AMQPQueue($this->channel);
         $this->queue->setName(substr(sha1(uniqid(mt_rand(), true)), 0, 10));
-        $this->queue->setArguments(['x-expires' => 1000]);
+        $this->queue->setArguments(['x-expires' => 5000]);
         $this->queue->declare();
         $this->reply_to = \uniqid('rcp_rp_');
-        $this->queue->bind($this->exchange->getName(), $this->reply_to);
+        try {
+            $this->queue->bind($this->exchange->getName(), $this->reply_to);
+        } catch (\Throwable $th) {
+            $this->logger->error("[Rpc-Client] Bind", ['extra' => $th->getMessage()]);
+        }
         return $this;
     }
 
