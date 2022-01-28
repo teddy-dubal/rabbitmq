@@ -142,7 +142,6 @@ class Consumer
         $callback        = $this->callback;
         $stack           = (new \Swarrot\Processor\Stack\Builder())
             ->push('Swarrot\Processor\MemoryLimit\MemoryLimitProcessor', $this->logger)
-            ->push('Swarrot\Processor\MaxMessages\MaxMessagesProcessor', $this->logger)
             ->push('Swarrot\Processor\ExceptionCatcher\ExceptionCatcherProcessor', $this->logger)
             ->push('Swarrot\Processor\Ack\AckProcessor', $messageProvider)
         ;
@@ -150,10 +149,6 @@ class Consumer
         $cb->setDic($this->_dic);
         $processor = $stack->resolve($cb);
         $consumer  = new SConsumer($messageProvider, $processor, null, $this->logger);
-        $consumer->consume([
-            'max_messages' => 100,
-        ]);
-
     }
     /**
      *
