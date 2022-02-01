@@ -149,6 +149,7 @@ class Consumer
         $cb->setDic($this->_dic);
         $processor = $stack->resolve($cb);
         $consumer  = new SConsumer($messageProvider, $processor, null, $this->logger);
+        $consumer->consume([]);
     }
     /**
      *
