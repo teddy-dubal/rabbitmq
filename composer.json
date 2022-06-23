@@ -8,10 +8,10 @@
     }
   ],
   "require": {
-    "monolog/monolog": "^2.2",
     "swarrot/swarrot": "^4.11"
   },
   "require-dev": {
+    "monolog/monolog": "^3.1",
     "pimple/pimple": "^3.0"
   },
   "autoload": {

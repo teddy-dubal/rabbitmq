@@ -55,11 +55,10 @@ class RpcClientProcessor implements ProcessorInterface, ConfigurableInterface, S
 
         $result = null;
 
-        $this->logger->info('Message received from the RPC Server ; terminating consumer', ['correlation_id' => $properties['correlation_id']]);
+        // $this->logger->debug('Message received from the RPC Server ; terminating consumer', ['correlation_id' => $properties['correlation_id']]);
         $this->awoken = true;
 
         if (null !== $this->processor) {
-            $this->logger->info('Sending message to sub-processor');
             $result = $this->processor->process($message, $options);
         }
 
