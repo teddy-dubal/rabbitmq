@@ -79,7 +79,7 @@ class RpcServer
         $this->exchange->setType($config['type'] ?? AMQP_EX_TYPE_TOPIC);
         $this->exchange->setFlags($config['flags'] ?? AMQP_DURABLE);
         $this->exchange->setArguments($config);
-        $this->exchange->declare();
+        $this->exchange->declareExchange();
         return $this;
     }
 
@@ -103,7 +103,7 @@ class RpcServer
         $this->queue = new \AMQPQueue($this->channel);
         $this->queue->setName($name . '-queue');
         $this->queue->setFlags(AMQP_DURABLE);
-        $this->queue->declare();
+        $this->queue->declareQueue();
         $this->queue->bind($this->exchange->getName(), $name);
         return $this;
     }
