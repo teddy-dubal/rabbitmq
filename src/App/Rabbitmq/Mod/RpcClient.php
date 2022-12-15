@@ -110,7 +110,7 @@ class RpcClient
         $this->queue       = new \AMQPQueue($this->channel);
         $this->queue->setName(substr(sha1(uniqid(mt_rand(), true)), 0, 10));
         $this->queue->setArguments(['x-expires' => 5000]);
-        $this->queue->declare();
+        $this->queue->declareQueue();
         $this->reply_to = \uniqid('rcp_rp_');
         try {
             $this->queue->bind($this->exchange->getName(), $this->reply_to);

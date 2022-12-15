@@ -8,7 +8,7 @@ services:
       - '.:/app'
     working_dir: '/app'
   rabbitmq:
-    image: docker.aladomheure.com/docker/rabbitmq
+    image: registry.gitlab.com/zee_docker/rabbitmq
     ports:
       - '15673:15672'
       - '15675:15674'
