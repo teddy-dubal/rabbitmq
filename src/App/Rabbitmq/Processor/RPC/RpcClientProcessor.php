@@ -33,7 +33,7 @@ class RpcClientProcessor implements ProcessorInterface, ConfigurableInterface, S
     /** @var bool */
     private $awoken = false;
 
-    public function __construct(ProcessorInterface $processor = null, LoggerInterface $logger = null)
+    public function __construct(ProcessorInterface|null $processor = null, LoggerInterface|null $logger = null)
     {
         $this->processor = $processor;
         $this->logger    = $logger ?: new NullLogger();
