@@ -8,7 +8,7 @@
     }
   ],
   "require": {
-    "swarrot/swarrot": "^4.11"
+    "swarrot/swarrot": "^4.19.0"
   },
   "require-dev": {
     "monolog/monolog": "^3.1",
