@@ -24,7 +24,7 @@ class RpcServerProcessor implements ProcessorInterface
     /** @var LoggerInterface */
     private $logger;
 
-    public function __construct(ProcessorInterface $processor, MessagePublisherInterface $publisher, LoggerInterface $logger = null)
+    public function __construct(ProcessorInterface $processor, MessagePublisherInterface $publisher, LoggerInterface|null $logger = null)
     {
         $this->processor = $processor;
         $this->publisher = $publisher;
