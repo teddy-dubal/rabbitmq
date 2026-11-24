@@ -95,7 +95,7 @@ class Consumer
         $this->exchange->setType($config['type'] ?? AMQP_EX_TYPE_TOPIC);
         $this->exchange->setFlags($config['flags'] ?? AMQP_DURABLE);
         $this->exchange->setArguments($config);
-        $this->exchange->declare();
+        $this->exchange->declareExchange();
         return $this;
     }
     /**
@@ -110,7 +110,7 @@ class Consumer
         $this->queue->setName($config['name']);
         $this->queue->setFlags($config['flags'] ?? AMQP_DURABLE);
         $this->queue->setArguments($config);
-        $this->queue->declare();
+        $this->queue->declareQueue();
         return $this;
     }
     /**

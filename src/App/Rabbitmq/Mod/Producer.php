@@ -78,7 +78,7 @@ class Producer
         $this->exchange->setType($config['type'] ?? AMQP_EX_TYPE_TOPIC);
         $this->exchange->setFlags($config['flags'] ?? AMQP_DURABLE);
         $this->exchange->setArguments($config);
-        $this->exchange->declare();
+        $this->exchange->declareExchange();
         return $this;
     }
 
