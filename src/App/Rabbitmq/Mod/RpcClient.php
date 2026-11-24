@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Rabbitmq\Mod;
 
 use App\Rabbitmq\Processor\RPC\RpcClientProcessor;
@@ -109,6 +108,7 @@ class RpcClient
         $this->routing_key = $name;
         $this->queue       = new \AMQPQueue($this->channel);
         $this->queue->setName(substr(sha1(uniqid(mt_rand(), true)), 0, 10));
+        $this->queue->setFlags(AMQP_EXCLUSIVE);
         $this->queue->setArguments(['x-expires' => 5000]);
         $this->queue->declareQueue();
         $this->reply_to = \uniqid('rcp_rp_');

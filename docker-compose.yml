@@ -8,16 +8,15 @@ services:
       - '.:/app'
     working_dir: '/app'
   rabbitmq:
-    image: bitnami/rabbitmq
+    image: rabbitmq:4.3.8-management-alpine
     ports:
       - '15673:15672'
       - '15675:15674'
       - '5673:5672'
     environment:
-      RABBITMQ_HOST: localhost
-      RABBITMQ_USERNAME: lae
-      RABBITMQ_PASSWORD: lae
-      RABBITMQ_VHOST: '/dev'
+      RABBITMQ_DEFAULT_USER: lae
+      RABBITMQ_DEFAULT_PASS: lae
+      RABBITMQ_DEFAULT_VHOST: '/dev'
       RABBITMQ_WS_HOST: localhost
       RABBITMQ_WS_USER: notify_ws
       RABBITMQ_WS_PASS: notify_ws
